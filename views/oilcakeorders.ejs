@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Room Orders</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<h1>Room Orders</h1>
+
+	<table cellspacing="1" cellpadding="5" border="1">
+		<tr>
+			<th>Name</th>
+			<th>Phone</th>
+			<th>Email</th>
+			<th>Order Type</th>
+			<th>Room</th>
+			<th>Date</th>
+			<th>Visit</th>
+			<th>Message</th>
+			<th>Reference</th>
+			<th>Status</th>
+			<th>Action</th>
+		</tr>
+
+	<% data.forEach(function(oilcakeorder){ %>
+		<tr>
+			<td><%= oilcakeorder.name %></td>
+			<td><%= oilcakeorder.phone %></td>
+			<td><%= oilcakeorder.email %></td>
+			<td><%= oilcakeorder.order %></td>
+			<td><%= oilcakeorder.oilcake %></td>
+			<td><%= oilcakeorder.date %></td>
+			<td><%= oilcakeorder.visit %></td>
+			<td><%= oilcakeorder.message %></td>
+			<td><%= oilcakeorder.ref %></td>
+			<td><%= oilcakeorder.status %></td>
+			<td><a href="updateoilcakeorder/<%= oilcakeorder.doc_id %>">Edit</a>  | <a href="">Delete</a> </td>
+		</tr>
+	<% }); %>
+
+	</table>
+
+</body>
+</html>
