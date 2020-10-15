@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Edit Appointment</title>
+    <title>Edit Oilcake Order</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
  </head>
 
@@ -31,96 +31,69 @@
     };
   </script>
   
- 
 
-  <form id="form" method="post" action="../updateappointment">
+  <form id="form" method="post" action="../updateroomorder">
   <div class="form-group">
     <label for="name">Name</label>
     <input type="text" class="form-control" name="name" value="<%= data.name %>">    
   </div>
-  <div class="form-group">
+   <div class="form-group">
     <label for="name">Phone</label>
     <input type="text" class="form-control" name="phone" value="<%= data.phone %>">    
   </div>
+
   <div class="form-group">
     <label for="email">Email</label>
     <input type="email" class="form-control" name="email" value="<%= data.email %>">
-  </div>
+  </div> 
   <div class="form-group">
-    Gender: 
-    <input type="radio" id="male" name="gender" value="M" 
-    <%if(data.gender == "M"){%>
-        <%="checked"%>
-    <%}%>
-    >
-    <label for="male">Male</label>
-    <input type="radio" id="female" name="gender" value="F"
-    <%if(data.gender == "F"){%>
-        <%="checked"%>
-    <%}%>
-    >
-    <label for="female">Female</label><br>  
+    <label for="name">Appointment</label>
+    <input type="text" class="form-control" name="order" value="<%= data.order %>">    
   </div>
-  <div class="form-group">
-    <label for="name">Doctor</label>
-    <input type="text" class="form-control" name="doctor" value="<%= data.doctor %>">    
-  </div>
-  <div class="form-group">
-    <label for="name">Department</label>
-    <input type="text" class="form-control" id="department" name="department" value="<%= data.department %>">    
-  </div>
-  <div class="form-group">
-    Visit: 
+   <div class="form-group">
+    <label for="name">Visit:</label>
     <input type="radio" name="visit" value="first time" 
-    <%if(data.visit == 'first time' ){%>
-        <%="checked"%>
-    <%}%>
+    <%if(data.visit =="first time"){%>
+      <%="checked"%>
+    <%}%> 
     >
-    <label for="male">First Time</label>
-    <input type="radio" name="vist" value="follow up"
-    <%if(data.visit == 'follow up'){%>
-        <%="checked"%>
-    <%}%>
-    >
-    <label for="female">Follow Up</label><br>     
+      <label for="name">First Time</label>
+      <input type="radio" name="visit" value="follow up"  
+      <%if(data.visit =="follow up"){%>
+      <%="checked"%>
+      <%}%> 
+      >
+      <label for="name">Follow up</label><br>
+  </div>
+  <div class="form-group">
+    <label for="name">Oilcake Type</label>
+    <input type="text" class="form-control" name="room" value="<%= data.room %>">    
   </div>
   <div class="form-group">
     <label for="name">Date</label>
     <input type="text" class="form-control" name="date" value="<%= data.date %>">    
   </div>
   <div class="form-group">
-    <label for="name">Time</label>
-    <input type="text" class="form-control" name="time" value="<%= data.time %>">    
-  </div>
-  <div class="form-group">
     <label for="name">Message</label>
-    <textarea name="message" rows="4" cols="50"><%= data.message %></textarea>
-      
+    <textarea class="form-control" name="message" rows="4" cols="50"><%= data.message %></textarea>   
   </div>
   <div class="form-group">
-    <label for="status">Status:</label>
-  <select name="status" id="status">    
-    <option value="pending"
-    <%if(data.status == "pending"){%>
-        <%="selected"%>
-    <%}%>
-    >Pending</option>
-    <option value="confirm"
-    <%if(data.status == "confirm"){%>
-        <%="selected"%>
-    <%}%>
-    >Confirm</option>
-   
-  </select>   
+    <label for="name">Status:</label>
+    <select name="status" id="status">
+      <option value="pending"
+      <%if(data.status =="pending"){%>
+      <%="selected"%>
+      <%}%>
+      >Pending</option>
+      <option value="confirm"
+      <%if(data.status =="confirm"){%>
+      <%="selected"%>
+      <%}%>
+      >Confirm</option>
+    </select>    
   </div>
-  <div class="form-group">
-    <label for="name">Comment</label>
-    <textarea name="comment" rows="4" cols="50"></textarea>      
-  </div>
-
-  
-  <input type="hidden"  name="doc_id" value="<%= data.doc_id %>">
-  <input type="hidden"  name="ref" value="<%= data.ref %>">
+  <input type="hidden"  id="doc_id" name="doc_id" value="<%= data.doc_id %>">
+  <input type="hidden"  id="ref" name="ref" value="<%= data.ref %>">
   <input type="submit" value="Submit"> 
   </form>
 
