@@ -668,9 +668,9 @@ const showRoom =(sender_psid) => {
         "payload": {
           "template_type": "generic",
           "elements": [{
-            "title": "Normal Room",
-            "subtitle": "Suitable (2-4 people)",
-            "image_url":"https://i1.sndcdn.com/avatars-JtzQf3QtJMEKuyWY-lr0XdA-t500x500.jpg",                       
+            "title": "Olive Oil Cake",
+            "subtitle": "Bon Appetit",
+            "image_url":"https://assets.bonappetit.com/photos/59e4e917a5e07f26bc1584c0/16:9/w_1280,c_limit/olive-oil-cake.jpg",                       
             "buttons": [
                 {
                   "type": "postback",
@@ -680,9 +680,9 @@ const showRoom =(sender_psid) => {
               ],
           },
           {
-            "title": "Medium Room",
-            "subtitle": "Suitable (3-6 people)",
-            "image_url":"https://imaginahome.com/wp-content/uploads/2017/06/wet-bar-design-ideas-1920x1280.jpg",                       
+            "title": "Classic Olive Oil Cake",
+            "subtitle": "Bake from Scratch",
+            "image_url":"https://www.bakefromscratch.com/wp-content/uploads/2018/09/classic-olive-oil-cake.jpg",                       
             "buttons": [
                 {
                   "type": "postback",
@@ -690,20 +690,7 @@ const showRoom =(sender_psid) => {
                   "payload": "Room:Medium Room",
                 }
               ],
-          },
-          {
-            "title": "Family Room",
-            "subtitle": "Suitable (4-10 people)",
-            "image_url":"https://i02.appmifile.com/564_bbs_en/30/04/2020/bad9864ed3.png",                       
-            "buttons": [
-                {
-                  "type": "postback",
-                  "title": "Family Room",
-                  "payload": "Room:Family Room",
-                }
-              ],
           }
-
           ]
         }
       }
