@@ -391,7 +391,7 @@ function handleQuickReply(sender_psid, received_message) {
   }else if(received_message.startsWith("product:")){
     let r_f=received_message.slice(9);
     userInputs[user_id].appointment=r_f;
-    showRoom(sender_psid);
+    showProduct(sender_psid);
 
   }else{
     switch(received_message) {     
@@ -402,7 +402,7 @@ function handleQuickReply(sender_psid, received_message) {
             showQuickReplyOff(sender_psid);
           break;   
         case "confirm-roombooking":
-            saveRoomBooking(userInputs[user_id], sender_psid);
+            saveProductBooking(userInputs[user_id], sender_psid);
           break;             
         default:
             defaultReply(sender_psid);
@@ -541,7 +541,7 @@ const handlePostback = (sender_psid, received_postback) => {
   let payload = received_postback.payload;
   console.log('BUTTON PAYLOAD', payload);
   
-  if(payload.startsWith("Room:")){
+  if(payload.startsWith("Product:")){
     let room_type=payload.slice(5);
     console.log("SELECTED ROOM IS: ", room_type);
     userInputs[user_id].room=room_type;
@@ -647,7 +647,7 @@ const appointment =(sender_psid) => {
             {
               "content_type":"text",
               "title":"Oil Cake",
-              "payload":"product:Room",              
+              "payload":"product:Product",              
             },{
               "content_type":"text",
               "title":"Peanut Oil",
@@ -661,7 +661,7 @@ const appointment =(sender_psid) => {
 
 }
 
-const showRoom =(sender_psid) => {
+const showProduct =(sender_psid) => {
   let response = {
       "attachment": {
         "type": "template",
@@ -674,8 +674,8 @@ const showRoom =(sender_psid) => {
             "buttons": [
                 {
                   "type": "postback",
-                  "title": "Normal Room",
-                  "payload": "Room:Normal Room",
+                  "title": "Olive Oil Cake",
+                  "payload": "Product:Olive Oil Cake",
                 }
               ],
           },
@@ -686,8 +686,8 @@ const showRoom =(sender_psid) => {
             "buttons": [
                 {
                   "type": "postback",
-                  "title": "Medium Room",
-                  "payload": "Room:Medium Room",
+                  "title": "Classic Olive Oil Cake",
+                  "payload": "Product:Classic Olive Oil Cake",
                 }
               ],
           }
@@ -775,7 +775,7 @@ const confirmAppointment = (sender_psid) => {
 
   }
   
-const saveRoomBooking = async (arg, sender_psid) =>{
+const saveProductBooking = async (arg, sender_psid) =>{
   let data=arg;
   data.ref= generateRandom(6);
   data.status = "pending";
