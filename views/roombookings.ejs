@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Room Bookings</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<h1>Room Bookings</h1>
+
+	<table cellspacing="1" cellpadding="5" border="1">
+		<tr>
+			<th>Name</th>
+			<th>Phone</th>
+			<th>Email</th>
+			<th>Appointment Type</th>
+			<th>Room</th>
+			<th>Date</th>
+			<th>Time</th>
+			<th>Visit</th>
+			<th>Message</th>
+			<th>Reference</th>
+			<th>Status</th>
+			<th>Action</th>
+		</tr>
+
+	<% data.forEach(function(roombooking){ %>
+		<tr>
+			<td><%= roombooking.name %></td>
+			<td><%= roombooking.phone %></td>
+			<td><%= roombooking.email %></td>
+			<td><%= roombooking.appointment %></td>
+			<td><%= roombooking.room %></td>
+			<td><%= roombooking.date %></td>
+			<td><%= roombooking.time %></td>
+			<td><%= roombooking.visit %></td>
+			<td><%= roombooking.message %></td>
+			<td><%= roombooking.ref %></td>
+			<td><%= roombooking.status %></td>
+			<td><a href="updateroombooking/<%= roombooking.doc_id %>">Edit</a>  | <a href="">Delete</a> </td>
+		</tr>
+	<% }); %>
+
+	</table>
+
+</body>
+</html>

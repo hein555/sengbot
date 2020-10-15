@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Edit Oilcake Order</title>
+    <title>Edit Room Booking</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
  </head>
 
@@ -32,7 +32,7 @@
   </script>
   
 
-  <form id="form" method="post" action="../updateoilcakeorder">
+  <form id="form" method="post" action="../updateroombooking">
   <div class="form-group">
     <label for="name">Name</label>
     <input type="text" class="form-control" name="name" value="<%= data.name %>">    
@@ -48,7 +48,7 @@
   </div> 
   <div class="form-group">
     <label for="name">Appointment</label>
-    <input type="text" class="form-control" name="order" value="<%= data.order %>">    
+    <input type="text" class="form-control" name="appointment" value="<%= data.appointment %>">    
   </div>
    <div class="form-group">
     <label for="name">Visit:</label>
@@ -66,8 +66,8 @@
       <label for="name">Follow up</label><br>
   </div>
   <div class="form-group">
-    <label for="name">Oilcake Type</label>
-    <input type="text" class="form-control" name="oilcake" value="<%= data.oilcake %>">    
+    <label for="name">Room Type</label>
+    <input type="text" class="form-control" name="room" value="<%= data.room %>">    
   </div>
   <div class="form-group">
     <label for="name">Date</label>

@@ -25,6 +25,7 @@ app.use(body_parser.urlencoded());
 
 const bot_questions ={
 "q1": "Please enter date (yyyy-mm-dd)",
+"q2": "Please enter time (hh:mm)",
 "q3": "Please enter full name",
 "q4": "Please enter phone",
 "q5": "Please enter email",
@@ -144,9 +145,9 @@ app.post('/test',function(req,res){
     callSend(sender_psid, response);
 });
 
-app.get('/admin/oilcakeorders', async function(req,res){
-  const oilcakeordersRef = db.collection('oilcakeorders');
-  const snapshot = await oilcakeordersRef.get();
+app.get('/admin/roombookings', async function(req,res){
+  const roombookingsRef = db.collection('roombookings');
+  const snapshot = await roombookingsRef.get();
   if(snapshot.empty){
     res.send('no data');
   }
@@ -154,24 +155,24 @@ app.get('/admin/oilcakeorders', async function(req,res){
   let data = [];
 
   snapshot.forEach(doc => {
-    let oilcakeorder ={};
-    oilcakeorder = doc.data();
-    oilcakeorder.doc_id = doc.id;
+    let roombooking ={};
+    roombooking = doc.data();
+    roombooking.doc_id = doc.id;
 
-    data.push(oilcakeorder);
+    data.push(roombooking);
     
   });
 
   console.log('DATA:', data);
 
-  res.render('oilcakeorders.ejs', {data:data});
+  res.render('roombookings.ejs', {data:data});
 });
 
-app.get('/admin/updateoilcakeorder/:doc_id', async function(req,res){
+app.get('/admin/updateroombooking/:doc_id', async function(req,res){
   let doc_id = req.params.doc_id;
     
-  const oilcakeorderRef = db.collection('oilcakeorders').doc(doc_id);
-  const doc = await oilcakeorderRef.get();
+  const roombookingRef = db.collection('roombookings').doc(doc_id);
+  const doc = await roombookingRef.get();
   if (!doc.exists){
     console.log('No such document!');s
   }else{
@@ -180,25 +181,25 @@ app.get('/admin/updateoilcakeorder/:doc_id', async function(req,res){
     data.doc_id = doc_id;
 
     console.log('Document data:', data);
-    res.render('editoilcakeorders.ejs',{data:data});
+    res.render('editroombookings.ejs',{data:data});
   }
 });
 
-app.post('/admin/updateoilcakeorder/', async function(req,res){
+app.post('/admin/updateroombooking/', async function(req,res){
   console.log('REQ:', req.body);
 
-  // const oilcakeorderRef = db.collection('oilcakeorders').doc('DC');
-  // const res  = await oilcakeorderRef.update
+  // const roombookingRef = db.collection('roombookings').doc('DC');
+  // const res  = await roombookingRef.update
     
   res.send('ok');
-  // const oilcakeorderRef = db.collection('oilcakeorders').doc(doc_id);
-  // const doc = await oilcakeorderRef.get();
+  // const roombookingRef = db.collection('roombookings').doc(doc_id);
+  // const doc = await roombookingRef.get();
   // if (!doc.exists){
   //   console.log('No such document!');s
   // }else{
   //   console.log('Document data:', doc.data());
   //   let data = doc.data();
-  //   res.render('editoilcakeorders.ejs',{data:data});
+  //   res.render('editroombookings.ejs',{data:data});
   // }
 });
 
@@ -387,10 +388,10 @@ function handleQuickReply(sender_psid, received_message) {
     userInputs[user_id].visit=visit;
     current_question='q1';
     botQuestions(current_question, sender_psid);
-  }else if(received_message.startsWith("oilcakefood:")){
+  }else if(received_message.startsWith("roomfood:")){
     let r_f=received_message.slice(9);
-    userInputs[user_id].order=r_f;
-    showOil Cake(sender_psid);
+    userInputs[user_id].appointment=r_f;
+    showRoom(sender_psid);
 
   }else{
     switch(received_message) {     
@@ -400,8 +401,8 @@ function handleQuickReply(sender_psid, received_message) {
         case "off":
             showQuickReplyOff(sender_psid);
           break;   
-        case "confirm-oilcakeorder":
-            saveOil CakeOrder(userInputs[user_id], sender_psid);
+        case "confirm-roombooking":
+            saveRoomBooking(userInputs[user_id], sender_psid);
           break;             
         default:
             defaultReply(sender_psid);
@@ -427,6 +428,11 @@ const handleMessage = (sender_psid, received_message) => {
     console.log('DATE ENTERED',received_message.text);
     userInputs[user_id].date=received_message.text;
     current_question='q2';
+    botQuestions(current_question,sender_psid);
+  }else if(current_question == 'q2'){
+    console.log('TIME ENTERED',received_message.text);
+    userInputs[user_id].time=received_message.text;
+    current_question='q3';
     botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
     console.log('FULL NAME ENTERED',received_message.text);
@@ -464,8 +470,8 @@ const handleMessage = (sender_psid, received_message) => {
       case "mingalarbar":
           greetInMyanmar(sender_psid);
         break;
-      case "order":
-          order(sender_psid);
+      case "appointment":
+          appointment(sender_psid);
         break;
       case "text":
         textReply(sender_psid);
@@ -535,10 +541,10 @@ const handlePostback = (sender_psid, received_postback) => {
   let payload = received_postback.payload;
   console.log('BUTTON PAYLOAD', payload);
   
-  if(payload.startsWith("Oil Cake:")){
-    let oilcake_type=payload.slice(5);
-    console.log("SELECTED ROOM IS: ", oilcake_type);
-    userInputs[user_id].oilcake=oilcake_type;
+  if(payload.startsWith("Room:")){
+    let room_type=payload.slice(5);
+    console.log("SELECTED ROOM IS: ", room_type);
+    userInputs[user_id].room=room_type;
     console.log('TEST',userInputs);
     firstOrFollowup(sender_psid);
   }
@@ -631,21 +637,21 @@ function webviewTest(sender_psid){
 
 
 /****************
-start oilcake 
+start room 
 ****************/
-const order =(sender_psid) => {
-  let response1 = {"text": "Welcome to Seng Peanut Oil Shop"};
+const appointment =(sender_psid) => {
+  let response1 = {"text": "Welcome to SENG Shop"};
   let response2 = {
-    "text": "Please Select Oil Cake or Peanut Oil",
+    "text": "Please Select Room or Food",
     "quick_replies":[
             {
               "content_type":"text",
-              "title":"Oil Cake",
-              "payload":"oilcakefood:Oil Cake",              
+              "title":"Room",
+              "payload":"roomfood:Room",              
             },{
               "content_type":"text",
-              "title":"Peanut Oil",
-              "payload":"oilcakefood:Peanut Oil",             
+              "title":"Food",
+              "payload":"roomfood:Food",             
             }
     ]
   };
@@ -655,36 +661,49 @@ const order =(sender_psid) => {
 
 }
 
-const showOil Cake =(sender_psid) => {
+const showRoom =(sender_psid) => {
   let response = {
       "attachment": {
         "type": "template",
         "payload": {
           "template_type": "generic",
           "elements": [{
-            "title": "Olive Oil Cake",
-            "subtitle": "Bon Appetit",
-            "image_url":"https://assets.bonappetit.com/photos/59e4e917a5e07f26bc1584c0/16:9/w_1280,c_limit/olive-oil-cake.jpg",                       
+            "title": "Normal Room",
+            "subtitle": "Suitable (2-4 people)",
+            "image_url":"https://i1.sndcdn.com/avatars-JtzQf3QtJMEKuyWY-lr0XdA-t500x500.jpg",                       
             "buttons": [
                 {
                   "type": "postback",
-                  "title": "Olive OIl CAke",
-                  "payload": "Oil Cake:Olive OIl CAke",
+                  "title": "Normal Room",
+                  "payload": "Room:Normal Room",
                 }
               ],
           },
           {
-            "title": "Classic Olive Oil Cake",
-            "subtitle": "Bake from Scratch",
-            "image_url":"https://www.bakefromscratch.com/wp-content/uploads/2018/09/classic-olive-oil-cake.jpg",                       
+            "title": "Medium Room",
+            "subtitle": "Suitable (3-6 people)",
+            "image_url":"https://imaginahome.com/wp-content/uploads/2017/06/wet-bar-design-ideas-1920x1280.jpg",                       
             "buttons": [
                 {
                   "type": "postback",
-                  "title": "Classic oliVe oil Cake",
-                  "payload": "Oil Cake:Classic oliVe oil Cake",
+                  "title": "Medium Room",
+                  "payload": "Room:Medium Room",
                 }
               ],
           },
+          {
+            "title": "Family Room",
+            "subtitle": "Suitable (4-10 people)",
+            "image_url":"https://i02.appmifile.com/564_bbs_en/30/04/2020/bad9864ed3.png",                       
+            "buttons": [
+                {
+                  "type": "postback",
+                  "title": "Family Room",
+                  "payload": "Room:Family Room",
+                }
+              ],
+          }
+
           ]
         }
       }
@@ -735,11 +754,12 @@ const botQuestions = (current_question,sender_psid) => {
 }
 
 const confirmAppointment = (sender_psid) => {
-  console.log('ORDER INFO',userInputs);
-   let Summary = "order:" + userInputs[user_id].order + "\u000A";
-   Summary += "oilcake:" + userInputs[user_id].oilcake + "\u000A";
+  console.log('BOOKING INFO',userInputs);
+   let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
+   Summary += "room:" + userInputs[user_id].room + "\u000A";
    Summary += "visit:" + userInputs[user_id].visit + "\u000A";
    Summary += "date:" + userInputs[user_id].date + "\u000A";
+   Summary += "time:" + userInputs[user_id].time + "\u000A";
    Summary += "name:" + userInputs[user_id].name + "\u000A";
    Summary += "phone:" + userInputs[user_id].phone + "\u000A";
    Summary += "email:" + userInputs[user_id].email + "\u000A";
@@ -754,7 +774,7 @@ const confirmAppointment = (sender_psid) => {
             {
               "content_type":"text",
               "title":"Confirm",
-              "payload":"confirm-oilcakeorder",              
+              "payload":"confirm-roombooking",              
             },{
               "content_type":"text",
               "title":"Cancel",
@@ -768,15 +788,15 @@ const confirmAppointment = (sender_psid) => {
 
   }
   
-const saveOil CakeOrder = async (arg, sender_psid) =>{
+const saveRoomBooking = async (arg, sender_psid) =>{
   let data=arg;
   data.ref= generateRandom(6);
   data.status = "pending";
-  db.collection('oilcakeorders').add(data).then((success)=>{
+  db.collection('roombookings').add(data).then((success)=>{
       console.log("SAVED", success);
-      let text = "Thank you. We have received your order."+ "\u000A";
+      let text = "Thank you. We have received your appointment."+ "\u000A";
       text += "We will call you very soon to confirm"+ "\u000A";
-      text +="Your Order reference number is:" + data.ref;
+      text +="Your Booking reference number is:" + data.ref;
       let response = {"text": text};
       callSend(sender_psid, response);
     }).catch((err)=>{
@@ -784,12 +804,12 @@ const saveOil CakeOrder = async (arg, sender_psid) =>{
     });
   }
 /****************
-end oilcake 
+end room 
 ****************/
 
 
 const hiReply =(sender_psid) => {
-  let response = {"text": "Hello user, you can make oilcake order"};
+  let response = {"text": "Hello user, you can make room booking"};
   callSend(sender_psid, response);
 }
 
