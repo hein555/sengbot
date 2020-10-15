@@ -388,7 +388,7 @@ function handleQuickReply(sender_psid, received_message) {
     userInputs[user_id].visit=visit;
     current_question='q1';
     botQuestions(current_question, sender_psid);
-  }else if(received_message.startsWith("roomfood:")){
+  }else if(received_message.startsWith("product:")){
     let r_f=received_message.slice(9);
     userInputs[user_id].appointment=r_f;
     showRoom(sender_psid);
@@ -470,7 +470,7 @@ const handleMessage = (sender_psid, received_message) => {
       case "mingalarbar":
           greetInMyanmar(sender_psid);
         break;
-      case "appointment":
+      case "order":
           appointment(sender_psid);
         break;
       case "text":
@@ -642,16 +642,16 @@ start room
 const appointment =(sender_psid) => {
   let response1 = {"text": "Welcome to SENG Shop"};
   let response2 = {
-    "text": "Please Select Room or Food",
+    "text": "Please Select Oil Cake or Peanut Oil",
     "quick_replies":[
             {
               "content_type":"text",
-              "title":"Room",
-              "payload":"roomfood:Room",              
+              "title":"Oil Cake",
+              "payload":"product:Room",              
             },{
               "content_type":"text",
-              "title":"Food",
-              "payload":"roomfood:Food",             
+              "title":"Peanut Oil",
+              "payload":"product:Food",             
             }
     ]
   };
@@ -754,7 +754,7 @@ const botQuestions = (current_question,sender_psid) => {
 }
 
 const confirmAppointment = (sender_psid) => {
-  console.log('BOOKING INFO',userInputs);
+  console.log('ORDER INFO',userInputs);
    let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
    Summary += "room:" + userInputs[user_id].room + "\u000A";
    Summary += "visit:" + userInputs[user_id].visit + "\u000A";
