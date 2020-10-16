@@ -396,7 +396,7 @@ function handleQuickReply(sender_psid, received_message) {
         case "on":
             showQuickReplyOn(sender_psid);
           break;
-        case "off":
+        case "off":w
             showQuickReplyOff(sender_psid);
           break;   
         case "confirm-roombooking":
