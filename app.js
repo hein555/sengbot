@@ -658,7 +658,7 @@ const showProduct =(sender_psid) => {
           "elements": [{
             "title": "Olive Oil Cake",
             "subtitle": "Bon Appetit",
-            "image_url":"https://assets.bonappetit.com/photos/59e4e917a5e07f26bc1584c0/16:9/w_1280,c_limit/olive-oil-cake.jpg",                       
+            "image_url":"https://i.pinimg.com/236x/f6/15/77/f61577e4eb47fb4f693fe4036b8fa7f6.jpg",                       
             "buttons": [
                 {
                   "type": "postback",
@@ -670,7 +670,7 @@ const showProduct =(sender_psid) => {
           {
             "title": "Classic Olive Oil Cake",
             "subtitle": "Bake from Scratch",
-            "image_url":"https://www.bakefromscratch.com/wp-content/uploads/2018/09/classic-olive-oil-cake.jpg",                       
+            "image_url":"https://images-eu.ssl-images-amazon.com/images/I/51zOKAleUYL._SY300_QL70_ML2_.jpg",                       
             "buttons": [
                 {
                   "type": "postback",
