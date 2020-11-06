@@ -18,23 +18,31 @@ const
   app = express(); 
 
 const uuidv4 = uuid();
-
+const session = require('express-session');
 
 app.use(body_parser.json());
 app.use(body_parser.urlencoded());
+app.use(session({secret: 'effystonem'}));
 
-const bot_questions ={
-"q3": "Please enter full name",
-"q4": "Please enter phone",
-"q5": "Please enter email",
-"q6": "Please leave a message"
+const bot_questions = {
+  "q1": "please enter you name",
+  "q2": "please enter your phone number",
+  "q3": "please enter your address",
+  "q4": "please enter your order reference number" 
 }
 
+let sess;
+
 let current_question = '';
-
-let user_id = '';
-
+let user_id = ''; 
 let userInputs = [];
+let first_reg = false;
+let customer = [];
+
+
+let temp_points = 0;
+let cart_total = 0;
+let cart_discount = 0;
 
 /*
 var storage = multer.diskStorage({
@@ -83,9 +91,11 @@ app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {  
-
+   
   // Parse the request body from the POST
   let body = req.body;
+
+
 
   
 
@@ -94,15 +104,15 @@ app.post('/webhook', (req, res) => {
     body.entry.forEach(function(entry) {
 
       let webhook_event = entry.messaging[0];
-      let sender_psid = webhook_event.sender.id; 
+      let sender_psid = webhook_event.sender.id;       
+      
+      user_id = sender_psid; 
 
-      user_id = sender_psid;
-      
       if(!userInputs[user_id]){
-        userInputs[user_id]={}; 
-      }
-      
-     
+        userInputs[user_id] = {};
+        customer[user_id] = {};
+      } 
+               
 
       if (webhook_event.message) {
         if(webhook_event.message.quick_reply){
@@ -133,160 +143,397 @@ app.get('/',function(req,res){
     res.send('your app is up and running');
 });
 
-app.get('/test',function(req,res){    
-    res.render('test.ejs');
-});
 
-app.post('/test',function(req,res){
-    const sender_psid = req.body.sender_id;     
-    let response = {"text": "You  click delete button"};
-    callSend(sender_psid, response);
-});
+app.get('/admin/products', async(req,res) =>{   
 
-app.get('/admin/roombookings', async function(req,res){
-  const roombookingsRef = db.collection('roombookings');
-  const snapshot = await roombookingsRef.get();
-  if(snapshot.empty){
+   
+  const productsRef = db.collection('products').orderBy('created_on', 'desc');
+  const snapshot = await productsRef.get();
+
+  if (snapshot.empty) {
     res.send('no data');
-  }
-
-  let data = [];
+  }else{
+    let data = []; 
 
   snapshot.forEach(doc => {
-    let roombooking ={};
-    roombooking = doc.data();
-    roombooking.doc_id = doc.id;
+    let product = {};
+    
+    product = doc.data();
+    product.doc_id = doc.id;
+    
+    let d = new Date(doc.data().created_on._seconds);
+    d = d.toString();
+    product.created_on = d;
+    
 
-    data.push(roombooking);
+    data.push(product);
     
   });
+  
+  res.render('products.ejs', {data:data});
 
-  console.log('DATA:', data);
-
-  res.render('roombookings.ejs', {data:data});
-});
-
-app.get('/admin/updateroombooking/:doc_id', async function(req,res){
-  let doc_id = req.params.doc_id;
-    
-  const roombookingRef = db.collection('roombookings').doc(doc_id);
-  const doc = await roombookingRef.get();
-  if (!doc.exists){
-    console.log('No such document!');s
-  }else{
-    console.log('Document data:', doc.data());
-    let data = doc.data();
-    data.doc_id = doc_id;
-
-    console.log('Document data:', data);
-    res.render('editroombookings.ejs',{data:data});
   }
-});
-
-app.post('/admin/updateroombooking/', async function(req,res){
-  console.log('REQ:', req.body);
-
-  // const roombookingRef = db.collection('roombookings').doc('DC');
-  // const res  = await roombookingRef.update
-    
-  res.send('ok');
-  // const roombookingRef = db.collection('roombookings').doc(doc_id);
-  // const doc = await roombookingRef.get();
-  // if (!doc.exists){
-  //   console.log('No such document!');s
-  // }else{
-  //   console.log('Document data:', doc.data());
-  //   let data = doc.data();
-  //   res.render('editroombookings.ejs',{data:data});
-  // }
-});
-
-/*********************************************
-Gallery page
-**********************************************/
-app.get('/showimages/:sender_id/',function(req,res){
-    const sender_id = req.params.sender_id;
-
-    let data = [];
-
-    db.collection("images").limit(20).get()
-    .then(  function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
-            let img = {};
-            img.id = doc.id;
-            img.url = doc.data().url;         
-
-            data.push(img);                      
-
-        });
-        console.log("DATA", data);
-        res.render('gallery.ejs',{data:data, sender_id:sender_id, 'page-title':'welcome to my page'}); 
-
-    }
-    
-    )
-    .catch(function(error) {
-        console.log("Error getting documents: ", error);
-    });    
-});
-
-
-app.post('/imagepick',function(req,res){
-      
-  const sender_id = req.body.sender_id;
-  const doc_id = req.body.doc_id;
-
-  console.log('DOC ID:', doc_id); 
-
-  db.collection('images').doc(doc_id).get()
-  .then(doc => {
-    if (!doc.exists) {
-      console.log('No such document!');
-    } else {
-      const image_url = doc.data().url;
-
-      console.log('IMG URL:', image_url);
-
-      let response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "Is this the image you like?",
-            "image_url":image_url,                       
-            "buttons": [
-                {
-                  "type": "postback",
-                  "title": "Yes!",
-                  "payload": "yes",
-                },
-                {
-                  "type": "postback",
-                  "title": "No!",
-                  "payload": "no",
-                }
-              ],
-          }]
-        }
-      }
-    }
 
   
-    callSend(sender_id, response); 
-    }
-  })
-  .catch(err => {
-    console.log('Error getting document', err);
-  });
+});
+
+app.get('/admin/addproduct', async function(req,res){
+  res.render('addproduct.ejs');  
+});
+
+app.post('/admin/saveproduct',upload.single('file'),function(req,res){
+       
+      let name  = req.body.name;
+      let description = req.body.description;
+      let img_url = "";
+      let price = parseInt(req.body.price); 
+      let sku = req.body.sku;
+
+      let today = new Date();
+
       
+
+
+      let file = req.file;
+      if (file) {
+        uploadImageToStorage(file).then((img_url) => {
+            db.collection('products').add({
+              name: name,
+              description: description,
+              image: img_url,
+              price:price,
+              sku:sku,
+              created_on:today
+              }).then(success => {   
+                console.log("DATA SAVED")
+                res.redirect('../admin/products');    
+              }).catch(error => {
+                console.log(error);
+              }); 
+        }).catch((error) => {
+          console.error(error);
+        });
+      }             
+});
+
+app.get('/admin/orders', async(req,res)=>{
+
+  const ordersRef = db.collection('orders').orderBy('created_on', 'desc');
+  const snapshot = await ordersRef.get();
+
+  if (snapshot.empty) {
+    res.send('no data');
+  } else{
+
+      let data = []; 
+
+  snapshot.forEach(doc => {
+    let order = {};
+    
+    order = doc.data();
+    order.doc_id = doc.id;
+    
+    let d = new Date(doc.data().created_on._seconds);
+    d = d.toString();
+    order.created_on = d;
+    
+
+    data.push(order);
+    
+  });
+
+
+  res.render('order_records.ejs', {data:data});
+
+
+  }
+
+    
+});
+
+
+app.get('/admin/update_order/:doc_id', async function(req,res){
+  let doc_id = req.params.doc_id; 
+  
+  const orderRef = db.collection('orders').doc(doc_id);
+  const doc = await orderRef.get();
+  if (!doc.exists) {
+    console.log('No such document!');
+  } else {
+    
+    let data = doc.data();
+    data.doc_id = doc.id;
+    
+    res.render('update_order.ejs', {data:data});
+  } 
+
+});
+
+
+app.post('/admin/update_order', function(req,res){
+   
+
+  let data = {
+    ref:req.body.ref,
+    name:req.body.name,
+    phone:req.body.phone,
+    address:req.body.address,
+    items:req.body.items,
+    sub_total:req.body.sub_total,
+    discount:req.body.discount,
+    total:req.body.total,
+    payment_type:req.body.payment_type,
+    status:req.body.status,
+    comment:req.body.comment,
+  }
+
+  db.collection('orders').doc(req.body.doc_id)
+  .update(data).then(()=>{
+      res.redirect('/admin/orders');
+  }).catch((err)=>console.log('ERROR:', error)); 
+ 
+});
+
+
+//route url
+app.get('/shop', async function(req,res){
+
+  customer[user_id].id = user_id;
+
+  const userRef = db.collection('users').doc(user_id);
+  const user = await userRef.get();
+  if (!user.exists) {
+    customer[user_id].name = ""; 
+    customer[user_id].phone = "";
+    customer[user_id].address = "";
+    customer[user_id].points = 0;
+         
+  } else {
+      customer[user_id].name = user.data().name; 
+      customer[user_id].phone = user.data().phone; 
+      customer[user_id].address = user.data().address; 
+      
+      customer[user_id].points = user.data().points; 
+       
+  } 
+
+
+  const productsRef = db.collection('products').orderBy('created_on', 'desc');
+  const snapshot = await productsRef.get();
+
+  if (snapshot.empty) {
+    res.send('no data');
+  } 
+
+  let data = []; 
+
+  snapshot.forEach(doc => { 
+    
+    let product = {}; 
+
+    product = doc.data();
+    
+    product.id = doc.id; 
+    
+    let d = new Date(doc.data().created_on._seconds);
+    d = d.toString();
+    product.created_on = d;   
+
+    data.push(product);
+    
+  });  
+
+  //console.log('DATA:', data); 
+  res.render('shop.ejs', {data:data});
+
+});
+
+
+app.post('/cart', function(req, res){
+    
+    if(!customer[user_id].cart){
+        customer[user_id].cart = [];
+    }
+    
+    let item = {};
+    item.id = req.body.item_id;
+    item.name = req.body.item_name;
+    item.price = parseInt(req.body.item_price);
+    item.qty = parseInt(req.body.item_qty);
+    item.total = item.price * item.qty; 
+
+
+    const itemInCart = (element) => element.id == item.id;
+    let item_index = customer[user_id].cart.findIndex(itemInCart); 
+
+    if(item_index < 0){
+        customer[user_id].cart.push(item);
+    }else{
+        customer[user_id].cart[item_index].qty = item.qty;
+        customer[user_id].cart[item_index].total = item.total;
+    }      
+     
+    res.redirect('../cart');   
+});
+
+
+app.get('/cart', function(req, res){     
+    temp_points = customer[user_id].points; 
+    let sub_total = 0;
+    cart_total = 0;
+    cart_discount = 0;
+
+    if(!customer[user_id].cart){
+        customer[user_id].cart = [];
+    }
+    if(customer[user_id].cart.length < 1){
+        res.send('your cart is empty. back to shop <a href="../shop">shop</a>');
+    }else{ 
+
+        customer[user_id].cart.forEach((item) => sub_total += item.total);        
+
+        cart_total = sub_total - cart_discount;       
+
+        customer[user_id].use_point = false;
+
+        res.render('cart.ejs', {cart:customer[user_id].cart, sub_total:sub_total, user:customer[user_id], cart_total:cart_total, discount:cart_discount, points:temp_points});    
+    }
 });
 
 
 
-/*********************************************
-END Gallery Page
-**********************************************/
+app.get('/emptycart', function(req, res){  
+    customer[user_id].cart = [];
+    customer[user_id].use_point = false;
+    //customer[user_id].points = 400;
+    cart_discount = 0;
+    res.redirect('../cart');    
+});
+
+
+app.post('/pointdiscount', function(req, res){
+
+    //temp_points = customer[user_id].points; 
+    let sub_total = 0;
+    //cart_total = 0;
+    //cart_discount = 0;
+  
+    if(!customer[user_id].cart){
+        customer[user_id].cart = [];
+    }
+    if(customer[user_id].cart.length < 1){
+        res.send('your cart is empty. back to shop <a href="../shop">shop</a>');
+    }else{ 
+        customer[user_id].use_point = true;        
+
+        customer[user_id].cart.forEach((item) => sub_total += item.total); 
+
+        console.log('BEFORE');
+        console.log('sub total:'+sub_total);
+        console.log('cart total:'+cart_total);
+        console.log('cart discount:'+cart_discount);
+        console.log('temp points:'+ temp_points);
+       
+        if(sub_total != 0 || cart_total != 0){
+          if(sub_total >=  parseInt(req.body.points)){
+           console.log('Point is smaller than subtotal');
+           cart_discount =  parseInt(req.body.points);
+           cart_total = sub_total - cart_discount;
+           temp_points = 0; 
+           
+          }else{
+             console.log('Point is greater than subtotal');
+             cart_discount = sub_total; 
+             cart_total = 0;
+             temp_points -= sub_total;
+                       
+          }
+
+        }
+
+                
+
+        console.log('AFTER');
+        console.log('sub total:'+sub_total);
+        console.log('cart total:'+cart_total);
+        console.log('cart discount:'+cart_discount);
+        console.log('temp points:'+ temp_points);
+        
+        res.render('cart.ejs', {cart:customer[user_id].cart, sub_total:sub_total, user:customer[user_id], cart_total:cart_total, discount:cart_discount, points:temp_points});      
+    }
+});
+
+
+app.get('/order', function(req, res){
+    let sub_total;
+  
+    if(!customer[user_id].cart){
+        customer[user_id].cart = [];
+    }
+    if(customer[user_id].cart.length < 1){
+        res.send('your cart is empty. back to shop <a href="../shop">shop</a>');
+    }else{   
+        sub_total = 0;
+        customer[user_id].cart.forEach((item) => sub_total += item.total);   
+
+        let item_list = "";
+        customer[user_id].cart.forEach((item) => item_list += item.name+'*'+item.qty);  
+        
+        res.render('order.ejs', {cart:customer[user_id].cart, sub_total:sub_total, user:customer[user_id], cart_total:cart_total, discount:cart_discount, items:item_list});    
+    }
+});
+
+app.post('/order', function(req, res){
+    let today = new Date();
+
+
+    let data = {
+      name: req.body.name,
+      phone: req.body.phone,
+      address: req.body.address,
+      items: req.body.items,
+      sub_total: parseInt(req.body.sub_total),
+      discount: parseInt(req.body.discount),
+      total: parseInt(req.body.total),
+      payment_type: req.body.payment_type,
+      ref: generateRandom(6),
+      created_on: today,
+      status: "pending",
+      comment:"",      
+    }
+
+
+
+
+    db.collection('orders').add(data).then((success)=>{
+        
+        console.log('TEMP POINTS:', temp_points);
+        console.log('CUSTOMER: ', customer[user_id]);
+
+        //get 10% from sub total and add to remaining points;
+        let newpoints = temp_points + data.sub_total * 0.1;  
+
+        let update_data = {points: newpoints };
+
+        console.log('update_data: ', update_data);
+
+        db.collection('users').doc(user_id).update(update_data).then((success)=>{
+              console.log('POINT UPDATE:');
+              let text = "Thank you. Your order has been confirmed. Your order reference number is "+data.ref;      
+              let response = {"text": text};
+              callSend(user_id, response);       
+          
+          }).catch((err)=>{
+             console.log('Error', err);
+          });   
+      }).catch((err)=>{
+         console.log('Error', err);
+      });
+});
+
+
+
+
 
 //webview test
 app.get('/webview/:sender_id',function(req,res){
@@ -294,8 +541,10 @@ app.get('/webview/:sender_id',function(req,res){
     res.render('webview.ejs',{title:"Hello!! from WebView", sender_id:sender_id});
 });
 
+
+
 app.post('/webview',upload.single('file'),function(req,res){
-       
+      
       let name  = req.body.name;
       let email = req.body.email;
       let img_url = "";
@@ -307,23 +556,23 @@ app.post('/webview',upload.single('file'),function(req,res){
 
       let file = req.file;
       if (file) {
-        uploadImageToStorage(file).then((img_url ) => {
-         db.collection('webview').add({
-            name: name,
-            email: email,
-            image: img_url
-            }).then(success => {   
-               console.log("DATA SAVED")
-               thankyouReply(sender, name, img_url);    
-            }).catch(error => {
-              console.log(error);
-            });
+        uploadImageToStorage(file).then((img_url) => {
+            db.collection('webview').add({
+              name: name,
+              email: email,
+              image: img_url
+              }).then(success => {   
+                console.log("DATA SAVED")
+                thankyouReply(sender, name, img_url);    
+              }).catch(error => {
+                console.log(error);
+              }); 
         }).catch((error) => {
           console.error(error);
         });
-      }
- 
-              
+      } 
+      
+           
 });
 
 //Set up Get Started Button. To run one time
@@ -352,8 +601,7 @@ app.get('/whitelists',function(req,res){
 
 
 // Accepts GET requests at the /webhook endpoint
-app.get('/webhook', (req, res) => {
-  
+app.get('/webhook', (req, res) => {  
 
   const VERIFY_TOKEN = process.env.VERIFY_TOKEN;  
 
@@ -376,37 +624,30 @@ Function to Handle when user send quick reply message
 ***********************************************/
 
 function handleQuickReply(sender_psid, received_message) {
-  
+
   console.log('QUICK REPLY', received_message);
 
-  received_message=received_message.toLowerCase();
+  received_message = received_message.toLowerCase();  
 
-  if(received_message.startsWith("visit:")){
-    let visit=received_message.slice(6);
-    userInputs[user_id].visit=visit;
-    current_question='q3';
-    botQuestions(current_question, sender_psid);
-  }else if(received_message.startsWith("product:")){
-    let r_f=received_message.slice(9);
-    userInputs[user_id].appointment=r_f;
-    showProduct(sender_psid);
-
-  }else{
-    switch(received_message) {     
-        case "on":
-            showQuickReplyOn(sender_psid);
-          break;
-        case "off":w
-            showQuickReplyOff(sender_psid);
-          break;   
-        case "confirm-roombooking":
-            saveProductBooking(userInputs[user_id], sender_psid);
-          break;             
-        default:
-            defaultReply(sender_psid);
-  } 
-}
-  
+  switch(received_message) {                
+      case "register":
+          current_question = "q1";
+          botQuestions(current_question, sender_psid);
+        break;
+      case "check-order":         
+          current_question = "q4";
+          botQuestions(current_question, sender_psid);
+        break; 
+      case "shop":
+          shopMenu(sender_psid);
+        break; 
+      case "confirm-register":         
+            saveRegistration(userInputs[user_id], sender_psid);
+        break;  
+                 
+      default:
+          defaultReply(sender_psid);
+  }  
  
 }
 
@@ -417,65 +658,53 @@ Function to Handle when user send text message
 const handleMessage = (sender_psid, received_message) => {
 
   console.log('TEXT REPLY', received_message);
-  //let message;
+ 
   let response;
 
   if(received_message.attachments){
      handleAttachments(sender_psid, received_message.attachments);
+  }else if(current_question == 'q1'){     
+     userInputs[user_id].name = received_message.text;
+     current_question = 'q2';
+     botQuestions(current_question, sender_psid);
+  }else if(current_question == 'q2'){    
+     userInputs[user_id].phone = received_message.text; 
+     current_question = 'q3';
+     botQuestions(current_question, sender_psid);
   }else if(current_question == 'q3'){
-    console.log('FULL NAME ENTERED',received_message.text);
-    userInputs[user_id].name=received_message.text;
-    current_question='q4';
-    botQuestions(current_question,sender_psid);
+     userInputs[user_id].address = received_message.text;     
+     current_question = '';     
+     confirmRegister(sender_psid);
   }else if(current_question == 'q4'){
-    console.log('PHONE ENTERED',received_message.text);
-    userInputs[user_id].phone=received_message.text;
-    current_question='q5';
-    botQuestions(current_question,sender_psid);
-  }else if(current_question == 'q5'){
-    console.log('EMAIL ENTERED',received_message.text);
-    userInputs[user_id].email=received_message.text;
-    current_question='q6';
-    botQuestions(current_question,sender_psid);
-  }else if(current_question == 'q6'){
-    console.log('MESSAGE ENTERED',received_message.text);
-    userInputs[user_id].message=received_message.text;
-    current_question='';
+     let order_ref = received_message.text; 
 
-    confirmAppointment(sender_psid);
+     console.log('order_ref: ', order_ref);    
+     current_question = '';     
+     showOrder(sender_psid, order_ref);
   }
-
   else {
       
-      let user_message = received_message.text;
-
+      let user_message = received_message.text;      
+     
       user_message = user_message.toLowerCase(); 
 
       switch(user_message) { 
-      case "hi":
-          hiReply(sender_psid);
+
+      
+      case "start":{
+          startGreeting(sender_psid);
         break;
-      case "mingalarbar":
-          greetInMyanmar(sender_psid);
-        break;
-      case "order":
-          appointment(sender_psid);
-        break;
+      }              
       case "text":
         textReply(sender_psid);
-        break;
-      case "quick":
-        quickReply(sender_psid);
-        break;
-      case "button":
+        break;      
+      case "button":                  
         buttonReply(sender_psid);
         break;
       case "webview":
         webviewTest(sender_psid);
-        break;       
-      case "show images":
-        showImages(sender_psid)
-        break;               
+        break;      
+                    
       default:
           defaultReply(sender_psid);
       }       
@@ -488,8 +717,13 @@ const handleMessage = (sender_psid, received_message) => {
 /*********************************************
 Function to handle when user send attachment
 **********************************************/
+
+
 const handleAttachments = (sender_psid, attachments) => {
-  console.log('ATTACHMENT REPLY', attachments);
+  
+  console.log('ATTACHMENT', attachments);
+
+
   let response; 
   let attachment_url = attachments[0].payload.url;
     response = {
@@ -524,19 +758,23 @@ const handleAttachments = (sender_psid, attachments) => {
 /*********************************************
 Function to handle when user click button
 **********************************************/
-const handlePostback = (sender_psid, received_postback) => {
+const handlePostback = (sender_psid, received_postback) => { 
+
   
+
   let payload = received_postback.payload;
+
   console.log('BUTTON PAYLOAD', payload);
+
   
-  if(payload.startsWith("Product:")){
-    let room_type=payload.slice(5);
-    console.log("SELECTED ROOM IS: ", room_type);
-    userInputs[user_id].room=room_type;
-    console.log('TEST',userInputs);
-    firstOrFollowup(sender_psid);
-  }
-  else{
+  if(payload.startsWith("Doctor:")){
+    let doctor_name = payload.slice(7);
+    console.log('SELECTED DOCTOR IS: ', doctor_name);
+    userInputs[user_id].doctor = doctor_name;
+    console.log('TEST', userInputs);
+    firstOrFollowUp(sender_psid);
+  }else{
+
       switch(payload) {        
       case "yes":
           showButtonReplyYes(sender_psid);
@@ -546,14 +784,18 @@ const handlePostback = (sender_psid, received_postback) => {
         break;                      
       default:
           defaultReply(sender_psid);
-    }     
+    } 
+
   }
+
+
+  
 }
 
 
 const generateRandom = (length) => {
    var result           = '';
-   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
    var charactersLength = characters.length;
    for ( var i = 0; i < length; i++ ) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -561,40 +803,7 @@ const generateRandom = (length) => {
    return result;
 }
 
-/*********************************************
-GALLERY SAMPLE
-**********************************************/
 
-const showImages = (sender_psid) => {
-  let response;
-  response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "show images",                       
-            "buttons": [              
-              {
-                "type": "web_url",
-                "title": "enter",
-                "url":"https://fbstarter.herokuapp.com/showimages/"+sender_psid,
-                 "webview_height_ratio": "full",
-                "messenger_extensions": true,          
-              },
-              
-            ],
-          }]
-        }
-      }
-    }
-  callSendAPI(sender_psid, response);
-}
-
-
-/*********************************************
-END GALLERY SAMPLE
-**********************************************/
 
 
 function webviewTest(sender_psid){
@@ -624,124 +833,89 @@ function webviewTest(sender_psid){
 }
 
 
-/****************
-start room 
-****************/
-const appointment =(sender_psid) => {
-  let response1 = {"text": "Welcome to SENG Shop"};
-  let response2 = {
-    "text": "Please Select Oil Cake or Peanut Oil",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"Oil Cake",
-              "payload":"product:Product",              
-            },{
-              "content_type":"text",
-              "title":"Peanut Oil",
-              "payload":"product:Food",             
-            }
-    ]
-  };
-  callSend(sender_psid, response1).then(()=>{
-    return callSend(sender_psid, response2);
-  });
 
-}
 
-const showProduct =(sender_psid) => {
-  let response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "Olive Oil Cake",
-            "subtitle": "Bon Appetit",
-            "image_url":"https://i.pinimg.com/236x/f6/15/77/f61577e4eb47fb4f693fe4036b8fa7f6.jpg",                       
-            "buttons": [
-                {
-                  "type": "postback",
-                  "title": "Olive Oil Cake",
-                  "payload": "Product:Olive Oil Cake",
-                }
-              ],
-          },
-          {
-            "title": "Classic Olive Oil Cake",
-            "subtitle": "Bake from Scratch",
-            "image_url":"https://images-eu.ssl-images-amazon.com/images/I/51zOKAleUYL._SY300_QL70_ML2_.jpg",                       
-            "buttons": [
-                {
-                  "type": "postback",
-                  "title": "Classic Olive Oil Cake",
-                  "payload": "Product:Classic Olive Oil Cake",
-                }
-              ],
-          }
-          ]
-        }
-      }
-    }
-  callSend(sender_psid, response);
-
-}
-
-const firstOrFollowup =(sender_psid) => {  
-  let response = {
-    "text": "First Time Visit or Follow Up?",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"First Time",
-              "payload":"visit:first time",              
-            },{
-              "content_type":"text",
-              "title":"Follow Up",
-              "payload":"visit:follow up",             
-            }
-    ]
-  };
-  callSend(sender_psid, response);
-}
-
-const botQuestions = (current_question,sender_psid) => {
-  if(current_question =='q3'){
+/**************
+startshop
+**************/
+const botQuestions = (current_question, sender_psid) => {
+  if(current_question == 'q1'){
+    let response = {"text": bot_questions.q1};
+    callSend(sender_psid, response);
+  }else if(current_question == 'q2'){
+    let response = {"text": bot_questions.q2};
+    callSend(sender_psid, response);
+  }else if(current_question == 'q3'){
     let response = {"text": bot_questions.q3};
-  callSend(sender_psid, response);
-  }else if(current_question =='q4'){
-    let response = {"text": bot_questions.q4};
-  callSend(sender_psid, response);
-  }else if(current_question =='q5'){
-    let response = {"text": bot_questions.q5};
-  callSend(sender_psid, response);
-  }else if(current_question =='q6'){
-    let response = {"text": bot_questions.q6};
-  callSend(sender_psid, response);
+    callSend(sender_psid, response);
   }
-
+  else if(current_question == 'q4'){
+    let response = {"text": bot_questions.q4};
+    callSend(sender_psid, response);
+  }
 }
 
-const confirmAppointment = (sender_psid) => {
-  console.log('ORDER INFO',userInputs);
-   let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
-   Summary += "room:" + userInputs[user_id].room + "\u000A";
-   Summary += "visit:" + userInputs[user_id].visit + "\u000A";
-   Summary += "name:" + userInputs[user_id].name + "\u000A";
-   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
-   Summary += "email:" + userInputs[user_id].email + "\u000A";
-   Summary += "message:" + userInputs[user_id].message + "\u000A";
-   
-  let response1 = {"text": Summary};
+const startGreeting =(sender_psid) => {
+  let response = {"text": "Welcome to NAY shop."};
+  callSend(sender_psid, response).then(()=>{
+    showMenu(sender_psid);
+  });  
+}
+
+const showMenu = async(sender_psid) => {
+  let title = "";
+  const userRef = db.collection('users').doc(sender_psid);
+    const user = await userRef.get();
+    if (!user.exists) {
+      title = "Register";  
+      first_reg = true;      
+    } else {
+      title = "Update Profile";  
+      first_reg = false;      
+    } 
 
 
-  let response2 = {
+  let response = {
     "text": "Select your reply",
     "quick_replies":[
             {
               "content_type":"text",
+              "title":title,
+              "payload":"register",              
+            },{
+              "content_type":"text",
+              "title":"Shop",
+              "payload":"shop",             
+            },
+            {
+              "content_type":"text",
+              "title":"My Order",
+              "payload":"check-order",             
+            }
+
+    ]
+  };
+  callSend(sender_psid, response);
+}
+
+
+
+const confirmRegister = (sender_psid) => {
+
+  let summery = "";
+  summery += "name:" + userInputs[user_id].name + "\u000A";
+  summery += "phone:" + userInputs[user_id].phone + "\u000A";
+  summery += "address:" + userInputs[user_id].address + "\u000A";
+
+  let response1 = {"text": summery};
+
+  let response2 = {
+    "text": "Confirm to register",
+    "quick_replies":[
+            {
+              "content_type":"text",
               "title":"Confirm",
-              "payload":"confirm-roombooking",              
+              "payload":"confirm-register",              
             },{
               "content_type":"text",
               "title":"Cancel",
@@ -749,75 +923,134 @@ const confirmAppointment = (sender_psid) => {
             }
     ]
   };
-  callSend(sender_psid, response1).then(() => {
+  
+  callSend(sender_psid, response1).then(()=>{
     return callSend(sender_psid, response2);
   });
+}
 
-  }
+const saveRegistration = (arg, sender_psid) => {
+
+  let data = arg;  
+
+  if(first_reg){
+      let today = new Date();
+      data.fid = sender_psid;
+      data.created_on = today;
+      data.points = 50;
+      data.status = "pending";
+     
   
-const saveProductBooking = async (arg, sender_psid) =>{
-  let data=arg;
-  data.ref= generateRandom(6);
-  data.status = "pending";
-  db.collection('roombookings').add(data).then((success)=>{
-      console.log("SAVED", success);
-      let text = "Thank you. We have received your appointment."+ "\u000A";
-      text += "We will call you very soon to confirm"+ "\u000A";
-      text +="Your Booking reference number is:" + data.ref;
+      db.collection('users').doc(sender_psid).set(data).then((success)=>{
+        console.log('SAVED', success);
+        //first_reg = false;
+        let text = "Thank you. You have been registered."+ "\u000A";      
+        let response = {"text": text};
+        callSend(sender_psid, response);
+      }).catch((err)=>{
+         console.log('Error', err);
+      });
+
+  }else{
+      let update_data = {name:data.name, phone:data.phone, address:data.address};
+      db.collection('users').doc(sender_psid).update(update_data).then((success)=>{
+      console.log('SAVED', success);
+      //first_reg = false;
+      let text = "Thank you. You have been registered."+ "\u000A";      
       let response = {"text": text};
       callSend(sender_psid, response);
-    }).catch((err)=>{
-        console.log('Error', err);
-    });
+      }).catch((err)=>{
+         console.log('Error', err);
+      });
+
   }
-/****************
-end room 
-****************/
+}
+
+const showOrder = async(sender_psid, order_ref) => {
+
+    let cust_points = 0;
+
+    const ordersRef = db.collection('orders').where("ref", "==", order_ref).limit(1);
+    const snapshot = await ordersRef.get();
+
+    const userRef = db.collection('users').doc(user_id);
+    const user = await userRef.get();
+    if (!user.exists) {
+      cust_points = 0;           
+    } else {                
+        cust_points  = user.data().points;          
+    } 
 
 
-const hiReply =(sender_psid) => {
-  let response = {"text": "Hello user, you can make room booking"};
+    if (snapshot.empty) {
+      let response = { "text": "Incorrect order number" };
+      callSend(sender_psid, response).then(()=>{
+        return startGreeting(sender_psid);
+      });
+    }else{
+          let order = {}
+
+          snapshot.forEach(doc => {      
+              order.ref = doc.data().ref;
+              order.status = doc.data().status;
+              order.comment = doc.data().comment;  
+          });
+
+
+          let response1 = { "text": `Your order ${order.ref} is ${order.status}.` };
+          let response2 = { "text": `Seller message: ${order.comment}.` };
+          let response3 = { "text": `You have remaining ${cust_points} point(s)` };
+            callSend(sender_psid, response1).then(()=>{
+              return callSend(sender_psid, response2).then(()=>{
+                return callSend(sender_psid, response3)
+              });
+          });
+
+    }
+
+    
+
+}
+
+
+
+
+const shopMenu =(sender_psid) => {
+  let response = {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": [{
+            "title": "Nay Shop",
+            "image_url":"https://img.favpng.com/8/22/6/toy-shop-retail-toys-r-us-clip-art-png-favpng-Q5kvdVUxgvDQT9M9vmsHzByQY.jpg",                       
+            "buttons": [              
+              {
+                "type": "web_url",
+                "title": "Shop Now",
+                "url":APP_URL+"shop/",
+                 "webview_height_ratio": "full",
+                "messenger_extensions": true,          
+              },
+              
+            ],
+          }]
+        }
+      }
+    }  
   callSend(sender_psid, response);
 }
 
-const greetInMyanmar =(sender_psid) => {
-  let response = {"text": "Mingalarbar. How May I Help you?"};
-  callSend(sender_psid, response);
-}
+
+/**************
+endshop
+**************/
 
 const textReply =(sender_psid) => {
   let response = {"text": "You sent text message"};
   callSend(sender_psid, response);
 }
 
-
-const quickReply =(sender_psid) => {
-  let response = {
-    "text": "Select your reply",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"On",
-              "payload":"on",              
-            },{
-              "content_type":"text",
-              "title":"Off",
-              "payload":"off",             
-            }
-    ]
-  };
-  callSend(sender_psid, response);
-}
-
-const showQuickReplyOn =(sender_psid) => {
-  let response = { "text": "You sent quick reply ON" };
-  callSend(sender_psid, response);
-}
-
-const showQuickReplyOff =(sender_psid) => {
-  let response = { "text": "You sent quick reply OFF" };
-  callSend(sender_psid, response);
-}
 
 const buttonReply =(sender_psid) => {
 
@@ -945,7 +1178,7 @@ const callSendAPI = (sender_psid, response) => {
     }, (err, res, body) => {
       if (!err) {
         //console.log('RES', res);
-        console.log('BODY', body);
+        //console.log('BODY', body);
         resolve('message sent!')
       } else {
         console.error("Unable to send message:" + err);
