@@ -23,11 +23,10 @@ const uuidv4 = uuid();
 app.use(body_parser.json());
 app.use(body_parser.urlencoded());
 
-const bot_questions = {
-  "q1": "please enter you name",
-  "q2": "please enter your phone number",
-  "q3": "please enter your address",
-  "q4": "please enter your order reference number" 
+const bot_questions ={
+"q1": "Please enter your name",
+"q2": "Please enter phone number",
+"q3": "Please enter address"
 }
 
 let current_question = '';
@@ -376,31 +375,25 @@ Function to Handle when user send quick reply message
 ***********************************************/
 
 function handleQuickReply(sender_psid, received_message) {
-
+  
   console.log('QUICK REPLY', received_message);
 
-  received_message = received_message.toLowerCase();  
+  received_message=received_message.toLowerCase();
 
-  switch(received_message) {                
+  switch(received_message) {     
       case "register":
-          current_question = "q1";
-          botQuestions(current_question, sender_psid);
+        current_question = "q1";
+          botQuestions(sender_psid, sender_psid);
         break;
-      case "check-order":         
-          current_question = "q4";
-          botQuestions(current_question, sender_psid);
-        break; 
       case "shop":
-          shopMenu(sender_psid);
-        break; 
-      case "confirm-register":         
-            saveRegistration(userInputs[user_id], sender_psid);
-        break;  
-                 
+          showShop(sender_psid);
+        break;   
+      case "Confirm-roombooking":
+          saveProductBooking(userInputs[user_id], sender_psid);
+        break;             
       default:
           defaultReply(sender_psid);
-  }  
- 
+  } 
 }
 /**********************************************
 Function to Handle when user send text message
@@ -414,43 +407,50 @@ const handleMessage = (sender_psid, received_message) => {
 
   if(received_message.attachments){
      handleAttachments(sender_psid, received_message.attachments);
-  }else if(current_question == 'q1'){     
-     userInputs[user_id].name = received_message.text;
-     current_question = 'q2';
-     botQuestions(current_question, sender_psid);
-  }else if(current_question == 'q2'){    
-     userInputs[user_id].phone = received_message.text; 
-     current_question = 'q3';
-     botQuestions(current_question, sender_psid);
+  }else if(current_question == 'q1'){
+    console.log('NAME ENTERED',received_message.text);
+    userInputs[user_id].name=received_message.text;
+    current_question='q2';
+    botQuestions(current_question,sender_psid);
+  }else if(current_question == 'q2'){
+    console.log('PHONE ENTERED',received_message.text);
+    userInputs[user_id].phone=received_message.text;
+    current_question='q3';
+    botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
-     userInputs[user_id].address = received_message.text;     
-     current_question = '';     
-     confirmRegister(sender_psid);
-  }else if(current_question == 'q4'){
-     let order_ref = received_message.text; 
-
-     console.log('order_ref: ', order_ref);    
-     current_question = '';     
-     showOrder(sender_psid, order_ref);
+    console.log('ADDRESS ENTERED',received_message.text);
+    userInputs[user_id].address=received_message.text;
+    current_question='';
+    confirmRegister(sender_psid);
   }
+
   else {
-      let user_message = received_message.text;      
+      
+      let user_message = received_message.text;
+
       user_message = user_message.toLowerCase(); 
+
       switch(user_message) { 
-      case "start":{
-          startGreeting(sender_psid);
+      
+      case "order":
+          appointment(sender_psid);
         break;
-      }              
+      case "start":{
+        startGreeting(sender_psid);
+        break;
+      }
       case "text":
         textReply(sender_psid);
-        break;      
-      case "button":                  
+        break;
+      case "button":
         buttonReply(sender_psid);
         break;
       case "webview":
         webviewTest(sender_psid);
-        break;      
-                    
+        break;       
+      case "show images":
+        showImages(sender_psid)
+        break;               
       default:
           defaultReply(sender_psid);
       }       
@@ -746,82 +746,72 @@ start room
 end room 
 ****************/
 
-/**************
-startshop
-**************/
-const botQuestions = (current_question, sender_psid) => {
-  if(current_question == 'q1'){
-    let response = {"text": bot_questions.q1};
-    callSend(sender_psid, response);
-  }else if(current_question == 'q2'){
-    let response = {"text": bot_questions.q2};
-    callSend(sender_psid, response);
-  }else if(current_question == 'q3'){
-    let response = {"text": bot_questions.q3};
-    callSend(sender_psid, response);
-  }
-  else if(current_question == 'q4'){
-    let response = {"text": bot_questions.q4};
-    callSend(sender_psid, response);
-  }
-}
+/****************
+startshop 
+****************/
 
+      
+// const startGreeting =(sender_psid) => {
+//   let response = {"text": "Welcome to SENG Shop."};
+//   callSend(sender_psid, response).then(()=>{
+//     showMenu(sender_psid);
+//   });
+    
 const startGreeting =(sender_psid) => {
-  let response = {"text": "Welcome to NAY shop."};
-  callSend(sender_psid, response).then(()=>{
-    showMenu(sender_psid);
-  });  
+  let response = {"text": "Welcome to SENG Shop."};
+  showMenu(sender_psid);
+  callSend(sender_psid, response);
 }
-
-const showMenu = async(sender_psid) => {
-  let title = "";
-  const userRef = db.collection('users').doc(sender_psid);
-    const user = await userRef.get();
-    if (!user.exists) {
-      title = "Register";  
-      first_reg = true;      
-    } else {
-      title = "Update Profile";  
-      first_reg = false;      
-    } 
-
-
+  
+const showMenu = (sender_psid) =>{
   let response = {
     "text": "Select your reply",
     "quick_replies":[
             {
               "content_type":"text",
-              "title":title,
+              "title":"Register",
               "payload":"register",              
             },{
               "content_type":"text",
               "title":"Shop",
               "payload":"shop",             
-            },
-            {
-              "content_type":"text",
-              "title":"My Order",
-              "payload":"check-order",             
             }
-
     ]
   };
   callSend(sender_psid, response);
 }
 
+const showRegister =(sender_psid) => {
+  let response = {"text": "You sent text message"};
+  callSend(sender_psid, response);
+}
 
+const botQuestions = (current_question,sender_psid) => {
+  if(current_question =='q1'){
+    let response = {"text": bot_questions.q3};
+  callSend(sender_psid, response);
+  }else if(current_question =='q2'){
+    let response = {"text": bot_questions.q4};
+  callSend(sender_psid, response);
+  }else if(current_question =='q3'){
+    let response = {"text": bot_questions.q5};
+  callSend(sender_psid, response);
+  }
+
+}
 
 const confirmRegister = (sender_psid) => {
+  console.log('ORDER INFO',userInputs);
+   let Summary ="";
+   Summary += "name:" + userInputs[user_id].name + "\u000A";
+   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
+   Summary += "address:" + userInputs[user_id].address + "\u000A";
+   
+  let response1 = {"text": Summary};
 
-  let summery = "";
-  summery += "name:" + userInputs[user_id].name + "\u000A";
-  summery += "phone:" + userInputs[user_id].phone + "\u000A";
-  summery += "address:" + userInputs[user_id].address + "\u000A";
-
-  let response1 = {"text": summery};
 
   let response2 = {
-    "text": "Confirm to register",
+    "text": "Select your reply",
     "quick_replies":[
             {
               "content_type":"text",
@@ -834,128 +824,28 @@ const confirmRegister = (sender_psid) => {
             }
     ]
   };
-  
-  callSend(sender_psid, response1).then(()=>{
+  callSend(sender_psid, response1).then(() => {
     return callSend(sender_psid, response2);
   });
-}
-
-const saveRegistration = (arg, sender_psid) => {
-
-  let data = arg;  
-
-  if(first_reg){
-      let today = new Date();
-      data.fid = sender_psid;
-      data.created_on = today;
-      data.points = 50;
-      data.status = "pending";
-     
-  
-      db.collection('users').doc(sender_psid).set(data).then((success)=>{
-        console.log('SAVED', success);
-        //first_reg = false;
-        let text = "Thank you. You have been registered."+ "\u000A";      
-        let response = {"text": text};
-        callSend(sender_psid, response);
-      }).catch((err)=>{
-         console.log('Error', err);
-      });
-
-  }else{
-      let update_data = {name:data.name, phone:data.phone, address:data.address};
-      db.collection('users').doc(sender_psid).update(update_data).then((success)=>{
-      console.log('SAVED', success);
-      //first_reg = false;
-      let text = "Thank you. You have been registered."+ "\u000A";      
-      let response = {"text": text};
-      callSend(sender_psid, response);
-      }).catch((err)=>{
-         console.log('Error', err);
-      });
 
   }
-}
+  
+const saveRegister = async (arg, sender_psid) =>{
+  let data=arg;
+  data.status = "pending";
+  db.collection('users').add(data).then((success)=>{
+      console.log("SAVED", success);
+      let text = "Thank you. You have been registered."+ "\u000A";
+      let response = {"text": text};
+      callSend(sender_psid, response);
+    }).catch((err)=>{
+        console.log('Error', err);
+    });
+  }
 
-const showOrder = async(sender_psid, order_ref) => {
-
-    let cust_points = 0;
-
-    const ordersRef = db.collection('orders').where("ref", "==", order_ref).limit(1);
-    const snapshot = await ordersRef.get();
-
-    const userRef = db.collection('users').doc(user_id);
-    const user = await userRef.get();
-    if (!user.exists) {
-      cust_points = 0;           
-    } else {                
-        cust_points  = user.data().points;          
-    } 
-
-
-    if (snapshot.empty) {
-      let response = { "text": "Incorrect order number" };
-      callSend(sender_psid, response).then(()=>{
-        return startGreeting(sender_psid);
-      });
-    }else{
-          let order = {}
-
-          snapshot.forEach(doc => {      
-              order.ref = doc.data().ref;
-              order.status = doc.data().status;
-              order.comment = doc.data().comment;  
-          });
-
-
-          let response1 = { "text": `Your order ${order.ref} is ${order.status}.` };
-          let response2 = { "text": `Seller message: ${order.comment}.` };
-          let response3 = { "text": `You have remaining ${cust_points} point(s)` };
-            callSend(sender_psid, response1).then(()=>{
-              return callSend(sender_psid, response2).then(()=>{
-                return callSend(sender_psid, response3)
-              });
-          });
-
-    }
-
-    
-
-}
-
-
-
-
-const shopMenu =(sender_psid) => {
-  let response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "Nay Shop",
-            "image_url":"https://img.favpng.com/8/22/6/toy-shop-retail-toys-r-us-clip-art-png-favpng-Q5kvdVUxgvDQT9M9vmsHzByQY.jpg",                       
-            "buttons": [              
-              {
-                "type": "web_url",
-                "title": "Shop Now",
-                "url":APP_URL+"shop/",
-                 "webview_height_ratio": "full",
-                "messenger_extensions": true,          
-              },
-              
-            ],
-          }]
-        }
-      }
-    }  
-  callSend(sender_psid, response);
-}
-
-
-/**************
+/****************
 endshop
-**************/
+****************/
 
 const textReply =(sender_psid) => {
   let response = {"text": "You sent text message"};
