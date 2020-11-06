@@ -750,62 +750,167 @@ startshop
 ****************/
 
       
+// const startGreeting =(sender_psid) => {
+//   let response = {"text": "Welcome to SENG Shop."};
+//   callSend(sender_psid, response).then(()=>{
+//     showMenu(sender_psid);
+//   });
+    
+// }
+// const showMenu = (sender_psid) =>{
+//   let response = {
+//     "text": "Select your reply",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"Register",
+//               "payload":"register",              
+//             },{
+//               "content_type":"text",
+//               "title":"Shop",
+//               "payload":"shop",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response);
+// }
+
+// const showRegister =(sender_psid) => {
+//   let response = {"text": "You sent text message"};
+//   callSend(sender_psid, response);
+// }
+
+// const botQuestions = (current_question,sender_psid) => {
+//   if(current_question =='q1'){
+//     let response = {"text": bot_questions.q3};
+//   callSend(sender_psid, response);
+//   }else if(current_question =='q2'){
+//     let response = {"text": bot_questions.q4};
+//   callSend(sender_psid, response);
+//   }else if(current_question =='q3'){
+//     let response = {"text": bot_questions.q5};
+//   callSend(sender_psid, response);
+//   }
+
+// }
+
+// const confirmRegister = (sender_psid) => {
+//   console.log('ORDER INFO',userInputs);
+//    let Summary ="";
+//    Summary += "name:" + userInputs[user_id].name + "\u000A";
+//    Summary += "phone:" + userInputs[user_id].phone + "\u000A";
+//    Summary += "address:" + userInputs[user_id].address + "\u000A";
+   
+//   let response1 = {"text": Summary};
+
+
+//   let response2 = {
+//     "text": "Select your reply",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"Confirm",
+//               "payload":"confirm-register",              
+//             },{
+//               "content_type":"text",
+//               "title":"Cancel",
+//               "payload":"off",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response1).then(() => {
+//     return callSend(sender_psid, response2);
+//   });
+
+//   }
+  
+// const saveRegister = async (arg, sender_psid) =>{
+//   let data=arg;
+//   data.status = "pending";
+//   db.collection('users').add(data).then((success)=>{
+//       console.log("SAVED", success);
+//       let text = "Thank you. You have been registered."+ "\u000A";
+//       let response = {"text": text};
+//       callSend(sender_psid, response);
+//     }).catch((err)=>{
+//         console.log('Error', err);
+//     });
+//   }
+
+
+const botQuestions = (current_question, sender_psid) => {
+  if(current_question == 'q1'){
+    let response = {"text": bot_questions.q1};
+    callSend(sender_psid, response);
+  }else if(current_question == 'q2'){
+    let response = {"text": bot_questions.q2};
+    callSend(sender_psid, response);
+  }else if(current_question == 'q3'){
+    let response = {"text": bot_questions.q3};
+    callSend(sender_psid, response);
+  }
+  else if(current_question == 'q4'){
+    let response = {"text": bot_questions.q4};
+    callSend(sender_psid, response);
+  }
+}
+
 const startGreeting =(sender_psid) => {
-  let response = {"text": "Welcome to SENG Shop."};
+  let response = {"text": "Welcome to NAY shop."};
   callSend(sender_psid, response).then(()=>{
     showMenu(sender_psid);
-  });
-    
+  });  
 }
-const showMenu = (sender_psid) =>{
+
+const showMenu = async(sender_psid) => {
+  let title = "";
+  const userRef = db.collection('users').doc(sender_psid);
+    const user = await userRef.get();
+    if (!user.exists) {
+      title = "Register";  
+      first_reg = true;      
+    } else {
+      title = "Update Profile";  
+      first_reg = false;      
+    } 
+
+
   let response = {
     "text": "Select your reply",
     "quick_replies":[
             {
               "content_type":"text",
-              "title":"Register",
+              "title":title,
               "payload":"register",              
             },{
               "content_type":"text",
               "title":"Shop",
               "payload":"shop",             
+            },
+            {
+              "content_type":"text",
+              "title":"My Order",
+              "payload":"check-order",             
             }
+
     ]
   };
   callSend(sender_psid, response);
 }
 
-const showRegister =(sender_psid) => {
-  let response = {"text": "You sent text message"};
-  callSend(sender_psid, response);
-}
 
-const botQuestions = (current_question,sender_psid) => {
-  if(current_question =='q1'){
-    let response = {"text": bot_questions.q3};
-  callSend(sender_psid, response);
-  }else if(current_question =='q2'){
-    let response = {"text": bot_questions.q4};
-  callSend(sender_psid, response);
-  }else if(current_question =='q3'){
-    let response = {"text": bot_questions.q5};
-  callSend(sender_psid, response);
-  }
-
-}
 
 const confirmRegister = (sender_psid) => {
-  console.log('ORDER INFO',userInputs);
-   let Summary ="";
-   Summary += "name:" + userInputs[user_id].name + "\u000A";
-   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
-   Summary += "address:" + userInputs[user_id].address + "\u000A";
-   
-  let response1 = {"text": Summary};
 
+  let summery = "";
+  summery += "name:" + userInputs[user_id].name + "\u000A";
+  summery += "phone:" + userInputs[user_id].phone + "\u000A";
+  summery += "address:" + userInputs[user_id].address + "\u000A";
+
+  let response1 = {"text": summery};
 
   let response2 = {
-    "text": "Select your reply",
+    "text": "Confirm to register",
     "quick_replies":[
             {
               "content_type":"text",
@@ -818,24 +923,124 @@ const confirmRegister = (sender_psid) => {
             }
     ]
   };
-  callSend(sender_psid, response1).then(() => {
+  
+  callSend(sender_psid, response1).then(()=>{
     return callSend(sender_psid, response2);
   });
+}
 
-  }
+const saveRegistration = (arg, sender_psid) => {
+
+  let data = arg;  
+
+  if(first_reg){
+      let today = new Date();
+      data.fid = sender_psid;
+      data.created_on = today;
+      data.points = 50;
+      data.status = "pending";
+     
   
-const saveRegister = async (arg, sender_psid) =>{
-  let data=arg;
-  data.status = "pending";
-  db.collection('users').add(data).then((success)=>{
-      console.log("SAVED", success);
-      let text = "Thank you. You have been registered."+ "\u000A";
+      db.collection('users').doc(sender_psid).set(data).then((success)=>{
+        console.log('SAVED', success);
+        //first_reg = false;
+        let text = "Thank you. You have been registered."+ "\u000A";      
+        let response = {"text": text};
+        callSend(sender_psid, response);
+      }).catch((err)=>{
+         console.log('Error', err);
+      });
+
+  }else{
+      let update_data = {name:data.name, phone:data.phone, address:data.address};
+      db.collection('users').doc(sender_psid).update(update_data).then((success)=>{
+      console.log('SAVED', success);
+      //first_reg = false;
+      let text = "Thank you. You have been registered."+ "\u000A";      
       let response = {"text": text};
       callSend(sender_psid, response);
-    }).catch((err)=>{
-        console.log('Error', err);
-    });
+      }).catch((err)=>{
+         console.log('Error', err);
+      });
+
   }
+}
+
+const showOrder = async(sender_psid, order_ref) => {
+
+    let cust_points = 0;
+
+    const ordersRef = db.collection('orders').where("ref", "==", order_ref).limit(1);
+    const snapshot = await ordersRef.get();
+
+    const userRef = db.collection('users').doc(user_id);
+    const user = await userRef.get();
+    if (!user.exists) {
+      cust_points = 0;           
+    } else {                
+        cust_points  = user.data().points;          
+    } 
+
+
+    if (snapshot.empty) {
+      let response = { "text": "Incorrect order number" };
+      callSend(sender_psid, response).then(()=>{
+        return startGreeting(sender_psid);
+      });
+    }else{
+          let order = {}
+
+          snapshot.forEach(doc => {      
+              order.ref = doc.data().ref;
+              order.status = doc.data().status;
+              order.comment = doc.data().comment;  
+          });
+
+
+          let response1 = { "text": `Your order ${order.ref} is ${order.status}.` };
+          let response2 = { "text": `Seller message: ${order.comment}.` };
+          let response3 = { "text": `You have remaining ${cust_points} point(s)` };
+            callSend(sender_psid, response1).then(()=>{
+              return callSend(sender_psid, response2).then(()=>{
+                return callSend(sender_psid, response3)
+              });
+          });
+
+    }
+
+    
+
+}
+
+
+
+
+const shopMenu =(sender_psid) => {
+  let response = {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": [{
+            "title": "Nay Shop",
+            "image_url":"https://img.favpng.com/8/22/6/toy-shop-retail-toys-r-us-clip-art-png-favpng-Q5kvdVUxgvDQT9M9vmsHzByQY.jpg",                       
+            "buttons": [              
+              {
+                "type": "web_url",
+                "title": "Shop Now",
+                "url":APP_URL+"shop/",
+                 "webview_height_ratio": "full",
+                "messenger_extensions": true,          
+              },
+              
+            ],
+          }]
+        }
+      }
+    }  
+  callSend(sender_psid, response);
+}
+
 
 /****************
 endshop
