@@ -102,8 +102,6 @@ app.post('/webhook', (req, res) => {
         sess.user_id = sender_psid;  
       } 
 
-      console.log('SESSION:', sess);
-
       if (webhook_event.message) {
         if(webhook_event.message.quick_reply){
             handleQuickReply(sender_psid, webhook_event.message.quick_reply.payload);
@@ -599,27 +597,27 @@ function webviewTest(sender_psid){
 /****************
 start room 
 ****************/
-const appointment =(sender_psid) => {
-  let response1 = {"text": "Welcome to SENG Shop"};
-  let response2 = {
-    "text": "Please Select Oil Cake or Peanut Oil",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"Oil Cake",
-              "payload":"product:Product",              
-            },{
-              "content_type":"text",
-              "title":"Peanut Oil",
-              "payload":"product:Food",             
-            }
-    ]
-  };
-  callSend(sender_psid, response1).then(()=>{
-    return callSend(sender_psid, response2);
-  });
+// const appointment =(sender_psid) => {
+//   let response1 = {"text": "Welcome to SENG Shop"};
+//   let response2 = {
+//     "text": "Please Select Oil Cake or Peanut Oil",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"Oil Cake",
+//               "payload":"product:Product",              
+//             },{
+//               "content_type":"text",
+//               "title":"Peanut Oil",
+//               "payload":"product:Food",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response1).then(()=>{
+//     return callSend(sender_psid, response2);
+//   });
 
-}
+// }
 
 // const showProduct =(sender_psid) => {
 //   let response = {
@@ -665,26 +663,12 @@ end room
 /****************
 startshop 
 ****************/
-// const botQuestions = (current_question,sender_psid) => {
-//   if(current_question =='q1'){
-//     let response = {"text": bot_questions.q3};
-//   callSend(sender_psid, response);
-//   }else if(current_question =='q2'){
-//     let response = {"text": bot_questions.q4};
-//   callSend(sender_psid, response);
-//   }else if(current_question =='q3'){
-//     let response = {"text": bot_questions.q5};
-//   callSend(sender_psid, response);
-//   }
 
-// }
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response).then(()=>{
     showMenu(sender_psid);  
-  });
-  
-  
+  });  
 }
   
 const showMenu = async(sender_psid) =>{
