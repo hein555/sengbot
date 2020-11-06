@@ -829,10 +829,14 @@ const saveRegistration = async (arg, sender_psid) =>{
   let data = arg;
   let today = new Date();
 
+  console.log();
+
   data.fid = sender_psid;
   data.create_on = today;
   data.point = 0;
   data.status = "pending";
+
+  console.log('USER DATA', data);
 
   db.collection('users').add(data).then((success)=>{
       console.log("SAVED", success);
