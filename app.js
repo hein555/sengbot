@@ -29,11 +29,9 @@ const bot_questions ={
 "q3": "Please enter address"
 }
 
+let sess;
 let current_question = '';
 
-let user_id = '';
-
-let userInputs = [];
 
 /*
 var storage = multer.diskStorage({
@@ -86,6 +84,8 @@ app.post('/webhook', (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
 
+  sess = req.session;
+
   
 
   // Check the webhook event is from a Page subscription
@@ -95,13 +95,13 @@ app.post('/webhook', (req, res) => {
       let webhook_event = entry.messaging[0];
       let sender_psid = webhook_event.sender.id; 
 
-      user_id = sender_psid;
       
-      if(!userInputs[user_id]){
-        userInputs[user_id]={}; 
+      sess = req.session;
+      if(!sess.user_id){
+        session.user_id = sender_psid;
       }
       
-     
+      console.log('SESSION: ', sess);
 
       if (webhook_event.message) {
         if(webhook_event.message.quick_reply){
@@ -130,16 +130,6 @@ app.use('/uploads', express.static('uploads'));
 
 app.get('/',function(req,res){    
     res.send('your app is up and running');
-});
-
-app.get('/test',function(req,res){    
-    res.render('test.ejs');
-});
-
-app.post('/test',function(req,res){
-    const sender_psid = req.body.sender_id;     
-    let response = {"text": "You  click delete button"};
-    callSend(sender_psid, response);
 });
 
 app.get('/admin/roombookings', async function(req,res){
@@ -389,7 +379,7 @@ function handleQuickReply(sender_psid, received_message) {
           showShop(sender_psid);
         break;   
       case "confirm-register":
-          saveRegistration(userInputs[user_id], sender_psid);
+          saveRegistration({name:sess.user_name, phone:sess.user_phone, address:sess.user_address}, sender_psid);
         break;             
       default:
           defaultReply(sender_psid);
@@ -408,18 +398,18 @@ const handleMessage = (sender_psid, received_message) => {
   if(received_message.attachments){
      handleAttachments(sender_psid, received_message.attachments);
   }else if(current_question == 'q1'){
-    console.log('NAME ENTERED',received_message.text);
-    userInputs[user_id].name=received_message.text;
+    
+    sess.user_name=received_message.text;
     current_question='q2';
     botQuestions(current_question,sender_psid);
   }else if(current_question == 'q2'){
-    console.log('PHONE ENTERED',received_message.text);
-    userInputs[user_id].phone=received_message.text;
+    
+    sess.user_phone=received_message.text;
     current_question='q3';
     botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
-    console.log('ADDRESS ENTERED',received_message.text);
-    userInputs[user_id].address=received_message.text;
+    
+    sess.user_address=received_message.text;
     current_question='';
     confirmRegister(sender_psid);
   }
@@ -624,124 +614,6 @@ const appointment =(sender_psid) => {
 
 }
 
-// const showProduct =(sender_psid) => {
-//   let response = {
-//       "attachment": {
-//         "type": "template",
-//         "payload": {
-//           "template_type": "generic",
-//           "elements": [{
-//             "title": "Olive Oil Cake",
-//             "subtitle": "Bon Appetit",
-//             "image_url":"https://i.pinimg.com/236x/f6/15/77/f61577e4eb47fb4f693fe4036b8fa7f6.jpg",                       
-//             "buttons": [
-//                 {
-//                   "type": "postback",
-//                   "title": "Olive Oil Cake",
-//                   "payload": "Product:Olive Oil Cake",
-//                 }
-//               ],
-//           },
-//           {
-//             "title": "Classic Olive Oil Cake",
-//             "subtitle": "Bake from Scratch",
-//             "image_url":"https://images-eu.ssl-images-amazon.com/images/I/51zOKAleUYL._SY300_QL70_ML2_.jpg",                       
-//             "buttons": [
-//                 {
-//                   "type": "postback",
-//                   "title": "Classic Olive Oil Cake",
-//                   "payload": "Product:Classic Olive Oil Cake",
-//                 }
-//               ],
-//           }
-//           ]
-//         }
-//       }
-//     }
-//   callSend(sender_psid, response);
-
-// }
-
-// const firstOrFollowup =(sender_psid) => {  
-//   let response = {
-//     "text": "First Time Visit or Follow Up?",
-//     "quick_replies":[
-//             {
-//               "content_type":"text",
-//               "title":"First Time",
-//               "payload":"visit:first time",              
-//             },{
-//               "content_type":"text",
-//               "title":"Follow Up",
-//               "payload":"visit:follow up",             
-//             }
-//     ]
-//   };
-//   callSend(sender_psid, response);
-// }
-
-// const botQuestions = (current_question,sender_psid) => {
-//   if(current_question =='q1'){
-//     let response = {"text": bot_questions.q3};
-//   callSend(sender_psid, response);
-//   }else if(current_question =='q2'){
-//     let response = {"text": bot_questions.q4};
-//   callSend(sender_psid, response);
-//   }else if(current_question =='q3'){
-//     let response = {"text": bot_questions.q5};
-//   callSend(sender_psid, response);
-//   }
-
-// }
-
-// const confirmAppointment = (sender_psid) => {
-//   console.log('ORDER INFO',userInputs);
-//    let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
-//    Summary += "room:" + userInputs[user_id].room + "\u000A";
-//    Summary += "visit:" + userInputs[user_id].visit + "\u000A";
-//    Summary += "name:" + userInputs[user_id].name + "\u000A";
-//    Summary += "phone:" + userInputs[user_id].phone + "\u000A";
-//    Summary += "email:" + userInputs[user_id].email + "\u000A";
-//    Summary += "message:" + userInputs[user_id].message + "\u000A";
-   
-//   let response1 = {"text": Summary};
-
-
-//   let response2 = {
-//     "text": "Select your reply",
-//     "quick_replies":[
-//             {
-//               "content_type":"text",
-//               "title":"Confirm",
-//               "payload":"confirm-roombooking",              
-//             },{
-//               "content_type":"text",
-//               "title":"Cancel",
-//               "payload":"off",             
-//             }
-//     ]
-//   };
-//   callSend(sender_psid, response1).then(() => {
-//     return callSend(sender_psid, response2);
-//   });
-
-//   }
-  
-// const saveProductBooking = async (arg, sender_psid) =>{
-//   let data=arg;
-//   data.ref= generateRandom(6);
-//   data.status = "pending";
-//   db.collection('roombookings').add(data).then((success)=>{
-//       console.log("SAVED", success);
-//       let text = "Thank you. We have received your appointment."+ "\u000A";
-//       text += "We will call you very soon to confirm"+ "\u000A";
-//       text +="Your Booking reference number is:" + data.ref;
-//       let response = {"text": text};
-//       callSend(sender_psid, response);
-//     }).catch((err)=>{
-//         console.log('Error', err);
-//     });
-//   }
 /****************
 end room 
 ****************/
@@ -805,11 +677,11 @@ const botQuestions = (current_question,sender_psid) => {
 }
 
 const confirmRegister = (sender_psid) => {
-  console.log('REGISTER INFO',userInputs);
+  console.log('SESSION: ',sess);
    let Summary ="";
-   Summary += "name:" + userInputs[user_id].name + "\u000A";
-   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
-   Summary += "address:" + userInputs[user_id].address + "\u000A";
+   Summary += "name:" + sess.user_name + "\u000A";
+   Summary += "phone:" + sess.user_phone + "\u000A";
+   Summary += "address:" + sess.user_address + "\u000A";
    
   let response1 = {"text": Summary};
 
@@ -836,9 +708,10 @@ const confirmRegister = (sender_psid) => {
   
 const saveRegistration = async (arg, sender_psid) =>{
   let data = arg;
-  let today = new Date();
-
+  
   console.log();
+
+  let today = new Date();
 
   data.fid = sender_psid;
   data.create_on = today;
