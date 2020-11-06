@@ -601,146 +601,146 @@ function webviewTest(sender_psid){
 /****************
 start room 
 ****************/
-const appointment =(sender_psid) => {
-  let response1 = {"text": "Welcome to SENG Shop"};
-  let response2 = {
-    "text": "Please Select Oil Cake or Peanut Oil",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"Oil Cake",
-              "payload":"product:Product",              
-            },{
-              "content_type":"text",
-              "title":"Peanut Oil",
-              "payload":"product:Food",             
-            }
-    ]
-  };
-  callSend(sender_psid, response1).then(()=>{
-    return callSend(sender_psid, response2);
-  });
+// const appointment =(sender_psid) => {
+//   let response1 = {"text": "Welcome to SENG Shop"};
+//   let response2 = {
+//     "text": "Please Select Oil Cake or Peanut Oil",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"Oil Cake",
+//               "payload":"product:Product",              
+//             },{
+//               "content_type":"text",
+//               "title":"Peanut Oil",
+//               "payload":"product:Food",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response1).then(()=>{
+//     return callSend(sender_psid, response2);
+//   });
 
-}
+// }
 
-const showProduct =(sender_psid) => {
-  let response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "Olive Oil Cake",
-            "subtitle": "Bon Appetit",
-            "image_url":"https://i.pinimg.com/236x/f6/15/77/f61577e4eb47fb4f693fe4036b8fa7f6.jpg",                       
-            "buttons": [
-                {
-                  "type": "postback",
-                  "title": "Olive Oil Cake",
-                  "payload": "Product:Olive Oil Cake",
-                }
-              ],
-          },
-          {
-            "title": "Classic Olive Oil Cake",
-            "subtitle": "Bake from Scratch",
-            "image_url":"https://images-eu.ssl-images-amazon.com/images/I/51zOKAleUYL._SY300_QL70_ML2_.jpg",                       
-            "buttons": [
-                {
-                  "type": "postback",
-                  "title": "Classic Olive Oil Cake",
-                  "payload": "Product:Classic Olive Oil Cake",
-                }
-              ],
-          }
-          ]
-        }
-      }
-    }
-  callSend(sender_psid, response);
+// const showProduct =(sender_psid) => {
+//   let response = {
+//       "attachment": {
+//         "type": "template",
+//         "payload": {
+//           "template_type": "generic",
+//           "elements": [{
+//             "title": "Olive Oil Cake",
+//             "subtitle": "Bon Appetit",
+//             "image_url":"https://i.pinimg.com/236x/f6/15/77/f61577e4eb47fb4f693fe4036b8fa7f6.jpg",                       
+//             "buttons": [
+//                 {
+//                   "type": "postback",
+//                   "title": "Olive Oil Cake",
+//                   "payload": "Product:Olive Oil Cake",
+//                 }
+//               ],
+//           },
+//           {
+//             "title": "Classic Olive Oil Cake",
+//             "subtitle": "Bake from Scratch",
+//             "image_url":"https://images-eu.ssl-images-amazon.com/images/I/51zOKAleUYL._SY300_QL70_ML2_.jpg",                       
+//             "buttons": [
+//                 {
+//                   "type": "postback",
+//                   "title": "Classic Olive Oil Cake",
+//                   "payload": "Product:Classic Olive Oil Cake",
+//                 }
+//               ],
+//           }
+//           ]
+//         }
+//       }
+//     }
+//   callSend(sender_psid, response);
 
-}
+// }
 
-const firstOrFollowup =(sender_psid) => {  
-  let response = {
-    "text": "First Time Visit or Follow Up?",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"First Time",
-              "payload":"visit:first time",              
-            },{
-              "content_type":"text",
-              "title":"Follow Up",
-              "payload":"visit:follow up",             
-            }
-    ]
-  };
-  callSend(sender_psid, response);
-}
+// const firstOrFollowup =(sender_psid) => {  
+//   let response = {
+//     "text": "First Time Visit or Follow Up?",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"First Time",
+//               "payload":"visit:first time",              
+//             },{
+//               "content_type":"text",
+//               "title":"Follow Up",
+//               "payload":"visit:follow up",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response);
+// }
 
-const botQuestions = (current_question,sender_psid) => {
-  if(current_question =='q1'){
-    let response = {"text": bot_questions.q3};
-  callSend(sender_psid, response);
-  }else if(current_question =='q2'){
-    let response = {"text": bot_questions.q4};
-  callSend(sender_psid, response);
-  }else if(current_question =='q3'){
-    let response = {"text": bot_questions.q5};
-  callSend(sender_psid, response);
-  }
+// const botQuestions = (current_question,sender_psid) => {
+//   if(current_question =='q1'){
+//     let response = {"text": bot_questions.q3};
+//   callSend(sender_psid, response);
+//   }else if(current_question =='q2'){
+//     let response = {"text": bot_questions.q4};
+//   callSend(sender_psid, response);
+//   }else if(current_question =='q3'){
+//     let response = {"text": bot_questions.q5};
+//   callSend(sender_psid, response);
+//   }
 
-}
+// }
 
-const confirmAppointment = (sender_psid) => {
-  console.log('ORDER INFO',userInputs);
-   let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
-   Summary += "room:" + userInputs[user_id].room + "\u000A";
-   Summary += "visit:" + userInputs[user_id].visit + "\u000A";
-   Summary += "name:" + userInputs[user_id].name + "\u000A";
-   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
-   Summary += "email:" + userInputs[user_id].email + "\u000A";
-   Summary += "message:" + userInputs[user_id].message + "\u000A";
+// const confirmAppointment = (sender_psid) => {
+//   console.log('ORDER INFO',userInputs);
+//    let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
+//    Summary += "room:" + userInputs[user_id].room + "\u000A";
+//    Summary += "visit:" + userInputs[user_id].visit + "\u000A";
+//    Summary += "name:" + userInputs[user_id].name + "\u000A";
+//    Summary += "phone:" + userInputs[user_id].phone + "\u000A";
+//    Summary += "email:" + userInputs[user_id].email + "\u000A";
+//    Summary += "message:" + userInputs[user_id].message + "\u000A";
    
-  let response1 = {"text": Summary};
+//   let response1 = {"text": Summary};
 
 
-  let response2 = {
-    "text": "Select your reply",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"Confirm",
-              "payload":"confirm-roombooking",              
-            },{
-              "content_type":"text",
-              "title":"Cancel",
-              "payload":"off",             
-            }
-    ]
-  };
-  callSend(sender_psid, response1).then(() => {
-    return callSend(sender_psid, response2);
-  });
+//   let response2 = {
+//     "text": "Select your reply",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"Confirm",
+//               "payload":"confirm-roombooking",              
+//             },{
+//               "content_type":"text",
+//               "title":"Cancel",
+//               "payload":"off",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response1).then(() => {
+//     return callSend(sender_psid, response2);
+//   });
 
-  }
+//   }
   
-const saveProductBooking = async (arg, sender_psid) =>{
-  let data=arg;
-  data.ref= generateRandom(6);
-  data.status = "pending";
-  db.collection('roombookings').add(data).then((success)=>{
-      console.log("SAVED", success);
-      let text = "Thank you. We have received your appointment."+ "\u000A";
-      text += "We will call you very soon to confirm"+ "\u000A";
-      text +="Your Booking reference number is:" + data.ref;
-      let response = {"text": text};
-      callSend(sender_psid, response);
-    }).catch((err)=>{
-        console.log('Error', err);
-    });
-  }
+// const saveProductBooking = async (arg, sender_psid) =>{
+//   let data=arg;
+//   data.ref= generateRandom(6);
+//   data.status = "pending";
+//   db.collection('roombookings').add(data).then((success)=>{
+//       console.log("SAVED", success);
+//       let text = "Thank you. We have received your appointment."+ "\u000A";
+//       text += "We will call you very soon to confirm"+ "\u000A";
+//       text +="Your Booking reference number is:" + data.ref;
+//       let response = {"text": text};
+//       callSend(sender_psid, response);
+//     }).catch((err)=>{
+//         console.log('Error', err);
+//     });
+//   }
 /****************
 end room 
 ****************/
@@ -779,15 +779,16 @@ const showRegister =(sender_psid) => {
   let response = {"text": "You sent text message"};
   callSend(sender_psid, response);
 }
+
 const botQuestions = (current_question,sender_psid) => {
   if(current_question =='q1'){
-    let response = {"text": bot_questions.q1};
+    let response = {"text": bot_questions.q3};
   callSend(sender_psid, response);
   }else if(current_question =='q2'){
-    let response = {"text": bot_questions.q2};
+    let response = {"text": bot_questions.q4};
   callSend(sender_psid, response);
   }else if(current_question =='q3'){
-    let response = {"text": bot_questions.q3};
+    let response = {"text": bot_questions.q5};
   callSend(sender_psid, response);
   }
 
