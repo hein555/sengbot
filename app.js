@@ -780,7 +780,7 @@ start shop
 ****************/
 
 const startGreeting =(sender_psid) => {
-  let response = {"text": "Welcome to SENG Shop"};
+  let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response);
 }
 
