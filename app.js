@@ -383,7 +383,7 @@ function handleQuickReply(sender_psid, received_message) {
   switch(received_message) {     
       case "register":
         current_question = "q1";
-          botQuestions(sender_psid, sender_psid);
+          botQuestions(current_question, sender_psid);
         break;
       case "shop":
           showShop(sender_psid);
