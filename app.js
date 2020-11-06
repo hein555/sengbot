@@ -20,10 +20,9 @@ const
 const uuidv4 = uuid();
 const session = require('express-session');
 
-
 app.use(body_parser.json());
 app.use(body_parser.urlencoded());
-app.use(session({secret: 'seng'}));
+app.use(session({secret: 'effystonem'}));
 
 const bot_questions ={
 "q1": "Please enter your name",
@@ -626,6 +625,19 @@ end room
 /****************
 startshop 
 ****************/
+const botQuestions = (current_question,sender_psid) => {
+  if(current_question =='q1'){
+    let response = {"text": bot_questions.q1};
+  callSend(sender_psid, response);
+  }else if(current_question =='q2'){
+    let response = {"text": bot_questions.q2};
+  callSend(sender_psid, response);
+  }else if(current_question =='q3'){
+    let response = {"text": bot_questions.q3};
+  callSend(sender_psid, response);
+  }
+
+}
 
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
@@ -666,19 +678,7 @@ const showRegister =(sender_psid) => {
   callSend(sender_psid, response);
 }
 
-const botQuestions = (current_question,sender_psid) => {
-  if(current_question =='q1'){
-    let response = {"text": bot_questions.q1};
-  callSend(sender_psid, response);
-  }else if(current_question =='q2'){
-    let response = {"text": bot_questions.q2};
-  callSend(sender_psid, response);
-  }else if(current_question =='q3'){
-    let response = {"text": bot_questions.q3};
-  callSend(sender_psid, response);
-  }
 
-}
 
 const confirmRegister = (sender_psid) => {
   console.log('SESSION:',sess);
