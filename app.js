@@ -402,16 +402,21 @@ const handleMessage = (sender_psid, received_message) => {
   }else if(current_question == 'q1'){
 
     sess.user_name=received_message.text;
+
+    console.log('NAME ENTERED: ',sess);
     current_question='q2';
     botQuestions(current_question,sender_psid);
+
   }else if(current_question == 'q2'){
 
     sess.user_phone=received_message.text;
+    console.log('PHONE ENTERED: ',sess);
     current_question='q3';
     botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
 
     sess.user_address=received_message.text;
+    console.log('ADDRESS ENTERED: ',sess);
     current_question='';
     confirmRegister(sender_psid);
   }
