@@ -773,7 +773,7 @@ const showMenu = async(sender_psid) =>{
     "quick_replies":[
             {
               "content_type":"text",
-              "title":"title",
+              "title":title,
               "payload":"register",              
             },{
               "content_type":"text",
