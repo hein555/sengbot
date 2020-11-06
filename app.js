@@ -713,12 +713,12 @@ const botQuestions = (current_question,sender_psid) => {
 
 const confirmRegister = (sender_psid) => {
   console.log('SESSION:',sess);
-   let summary ="";
-   summary += "name:" + sess.user_name + "\u000A";
-   summary += "phone:" + sess.user_phone + "\u000A";
-   summary += "address:" + sess.user_address + "\u000A";
+   let Summary ="";
+   Summary += "name:" + sess.user_name + "\u000A";
+   Summary += "phone:" + sess.user_phone + "\u000A";
+   Summary += "address:" + sess.user_address + "\u000A";
    
-  let response1 = {"text": summary};
+  let response1 = {"text": Summary};
 
 
   let response2 = {
