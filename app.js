@@ -825,7 +825,7 @@ const confirmRegister = (sender_psid) => {
 
   }
   
-const saveRegister = async (arg, sender_psid) =>{
+const saveRegistration = async (arg, sender_psid) =>{
   let data = arg;
   let today = new Date();
 
