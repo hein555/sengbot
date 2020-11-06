@@ -592,27 +592,27 @@ function webviewTest(sender_psid){
 /****************
 start room 
 ****************/
-const appointment =(sender_psid) => {
-  let response1 = {"text": "Welcome to SENG Shop"};
-  let response2 = {
-    "text": "Please Select Oil Cake or Peanut Oil",
-    "quick_replies":[
-            {
-              "content_type":"text",
-              "title":"Oil Cake",
-              "payload":"product:Product",              
-            },{
-              "content_type":"text",
-              "title":"Peanut Oil",
-              "payload":"product:Food",             
-            }
-    ]
-  };
-  callSend(sender_psid, response1).then(()=>{
-    return callSend(sender_psid, response2);
-  });
+// const appointment =(sender_psid) => {
+//   let response1 = {"text": "Welcome to SENG Shop"};
+//   let response2 = {
+//     "text": "Please Select Oil Cake or Peanut Oil",
+//     "quick_replies":[
+//             {
+//               "content_type":"text",
+//               "title":"Oil Cake",
+//               "payload":"product:Product",              
+//             },{
+//               "content_type":"text",
+//               "title":"Peanut Oil",
+//               "payload":"product:Food",             
+//             }
+//     ]
+//   };
+//   callSend(sender_psid, response1).then(()=>{
+//     return callSend(sender_psid, response2);
+//   });
 
-}
+// }
 
 // const showProduct =(sender_psid) => {
 //   let response = {
