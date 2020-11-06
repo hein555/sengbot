@@ -24,10 +24,9 @@ app.use(body_parser.json());
 app.use(body_parser.urlencoded());
 
 const bot_questions ={
-"q3": "Please enter full name",
-"q4": "Please enter phone",
-"q5": "Please enter email",
-"q6": "Please leave a message"
+"q1": "Please enter your name",
+"q2": "Please enter phone number",
+"q3": "Please enter address"
 }
 
 let current_question = '';
@@ -381,35 +380,21 @@ function handleQuickReply(sender_psid, received_message) {
 
   received_message=received_message.toLowerCase();
 
-  if(received_message.startsWith("visit:")){
-    let visit=received_message.slice(6);
-    userInputs[user_id].visit=visit;
-    current_question='q3';
-    botQuestions(current_question, sender_psid);
-  }else if(received_message.startsWith("product:")){
-    let r_f=received_message.slice(9);
-    userInputs[user_id].appointment=r_f;
-    showProduct(sender_psid);
-
-  }else{
-    switch(received_message) {     
-        case "on":
-            showQuickReplyOn(sender_psid);
-          break;
-        case "off":w
-            showQuickReplyOff(sender_psid);
-          break;   
-        case "confirm-roombooking":
-            saveProductBooking(userInputs[user_id], sender_psid);
-          break;             
-        default:
-            defaultReply(sender_psid);
+  switch(received_message) {     
+      case "register":
+          current_question = "q1";
+          botQuestions(current_question, sender_psid);
+        break;
+      case "shop":
+          showShop(sender_psid);
+        break;   
+      case "Confirm-roombooking":
+          saveProductBooking(userInputs[user_id], sender_psid);
+        break;             
+      default:
+          defaultReply(sender_psid);
   } 
 }
-  
- 
-}
-
 /**********************************************
 Function to Handle when user send text message
 ***********************************************/
@@ -422,27 +407,21 @@ const handleMessage = (sender_psid, received_message) => {
 
   if(received_message.attachments){
      handleAttachments(sender_psid, received_message.attachments);
-  }else if(current_question == 'q3'){
-    console.log('FULL NAME ENTERED',received_message.text);
+  }else if(current_question == 'q1'){
+    console.log('NAME ENTERED',received_message.text);
     userInputs[user_id].name=received_message.text;
-    current_question='q4';
+    current_question='q2';
     botQuestions(current_question,sender_psid);
-  }else if(current_question == 'q4'){
+  }else if(current_question == 'q2'){
     console.log('PHONE ENTERED',received_message.text);
     userInputs[user_id].phone=received_message.text;
-    current_question='q5';
+    current_question='q3';
     botQuestions(current_question,sender_psid);
-  }else if(current_question == 'q5'){
-    console.log('EMAIL ENTERED',received_message.text);
-    userInputs[user_id].email=received_message.text;
-    current_question='q6';
-    botQuestions(current_question,sender_psid);
-  }else if(current_question == 'q6'){
-    console.log('MESSAGE ENTERED',received_message.text);
-    userInputs[user_id].message=received_message.text;
+  }else if(current_question == 'q3'){
+    console.log('ADDRESS ENTERED',received_message.text);
+    userInputs[user_id].address=received_message.text;
     current_question='';
-
-    confirmAppointment(sender_psid);
+    confirmRegister(sender_psid);
   }
 
   else {
@@ -453,9 +432,6 @@ const handleMessage = (sender_psid, received_message) => {
 
       switch(user_message) { 
       
-      case "mingalarbar":
-          greetInMyanmar(sender_psid);
-        break;
       case "order":
           appointment(sender_psid);
         break;
@@ -464,9 +440,6 @@ const handleMessage = (sender_psid, received_message) => {
       }
       case "text":
         textReply(sender_psid);
-        break;
-      case "quick":
-        quickReply(sender_psid);
         break;
       case "button":
         buttonReply(sender_psid);
@@ -707,17 +680,14 @@ const firstOrFollowup =(sender_psid) => {
 }
 
 const botQuestions = (current_question,sender_psid) => {
-  if(current_question =='q3'){
+  if(current_question =='q1'){
     let response = {"text": bot_questions.q3};
   callSend(sender_psid, response);
-  }else if(current_question =='q4'){
+  }else if(current_question =='q2'){
     let response = {"text": bot_questions.q4};
   callSend(sender_psid, response);
-  }else if(current_question =='q5'){
+  }else if(current_question =='q3'){
     let response = {"text": bot_questions.q5};
-  callSend(sender_psid, response);
-  }else if(current_question =='q6'){
-    let response = {"text": bot_questions.q6};
   callSend(sender_psid, response);
   }
 
@@ -776,49 +746,100 @@ end room
 ****************/
 
 /****************
-start shop 
+startshop 
 ****************/
 
+      
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response);
 }
 
-/****************
-end shop
-****************/
-
-const textReply =(sender_psid) => {
-  let response = {"text": "You sent text message"};
-  callSend(sender_psid, response);
-}
-
-
-const quickReply =(sender_psid) => {
+const showMenu = (sender_psid) =>{
   let response = {
     "text": "Select your reply",
     "quick_replies":[
             {
               "content_type":"text",
-              "title":"On",
-              "payload":"on",              
+              "title":"Register",
+              "payload":"register",              
             },{
               "content_type":"text",
-              "title":"Off",
-              "payload":"off",             
+              "title":"Shop",
+              "payload":"shop",             
             }
     ]
   };
   callSend(sender_psid, response);
 }
 
-const showQuickReplyOn =(sender_psid) => {
-  let response = { "text": "You sent quick reply ON" };
+const showRegister =(sender_psid) => {
+  let response = {"text": "You sent text message"};
   callSend(sender_psid, response);
 }
+const botQuestions = (current_question,sender_psid) => {
+  if(current_question =='q1'){
+    let response = {"text": bot_questions.q3};
+  callSend(sender_psid, response);
+  }else if(current_question =='q2'){
+    let response = {"text": bot_questions.q4};
+  callSend(sender_psid, response);
+  }else if(current_question =='q3'){
+    let response = {"text": bot_questions.q5};
+  callSend(sender_psid, response);
+  }
 
-const showQuickReplyOff =(sender_psid) => {
-  let response = { "text": "You sent quick reply OFF" };
+}
+
+const confirmRegister = (sender_psid) => {
+  console.log('ORDER INFO',userInputs);
+   let Summary ="";
+   Summary += "name:" + userInputs[user_id].name + "\u000A";
+   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
+   Summary += "address:" + userInputs[user_id].address + "\u000A";
+   
+  let response1 = {"text": Summary};
+
+
+  let response2 = {
+    "text": "Select your reply",
+    "quick_replies":[
+            {
+              "content_type":"text",
+              "title":"Confirm",
+              "payload":"confirm-register",              
+            },{
+              "content_type":"text",
+              "title":"Cancel",
+              "payload":"off",             
+            }
+    ]
+  };
+  callSend(sender_psid, response1).then(() => {
+    return callSend(sender_psid, response2);
+  });
+
+  }
+  
+const saveRegister = async (arg, sender_psid) =>{
+  let data=arg;
+  data.status = "pending";
+  db.collection('users').add(data).then((success)=>{
+      console.log("SAVED", success);
+      let text = "Thank you. You have been registered."+ "\u000A";
+      let response = {"text": text};
+      callSend(sender_psid, response);
+    }).catch((err)=>{
+        console.log('Error', err);
+    });
+  }
+
+/****************
+endshop
+****************/
+
+const textReply =(sender_psid) => {
+  let response = {"text": "You sent text message"};
   callSend(sender_psid, response);
 }
 
