@@ -408,7 +408,7 @@ const handleMessage = (sender_psid, received_message) => {
     botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
     sess.user_address=received_message.text;
-    console.log('ADD ENTERED: ', sess);
+    console.log('ADDRESS ENTERED: ', sess);
     current_question='';
     confirmRegister(sender_psid);
   }
@@ -714,7 +714,7 @@ const botQuestions = (current_question,sender_psid) => {
 }
 
 const confirmRegister = (sender_psid) => {
-  console.log('SESSION:',sess);
+  console.log('SESSION: ',sess);
    let Summary ="";
    Summary += "name:" + sess.user_name + "\u000A";
    Summary += "phone:" + sess.user_phone + "\u000A";
