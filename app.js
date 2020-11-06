@@ -758,7 +758,7 @@ const startGreeting =(sender_psid) => {
   
 }
   
-const showMenu = (sender_psid) =>{
+const showMenu = aync(sender_psid) =>{
   let title = "";
   const userRef = db.collection('users').doc(sender_psid);
   if(!user.exists){
