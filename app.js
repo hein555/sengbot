@@ -760,7 +760,7 @@ const startGreeting =(sender_psid) => {
   
 const showMenu = (sender_psid) =>{
   let title = "";
-  const userRef = db.collection('users').doc(currentUser.id);
+  const userRef = db.collection('users').doc(sender_psid);
   if(!user.exists){
     title = "Register"
   }else{
