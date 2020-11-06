@@ -758,13 +758,13 @@ const startGreeting =(sender_psid) => {
   
 }
   
-const showMenu = aync(sender_psid) =>{
+const showMenu = async(sender_psid) =>{
   let title = "";
   const userRef = db.collection('users').doc(sender_psid);
   if(!user.exists){
-    title = "Register"
+    title = "Register";
   }else{
-    title = "Update Profile"
+    title = "Update Profile";
   }
 
   let response = {
