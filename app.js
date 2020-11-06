@@ -382,8 +382,7 @@ function handleQuickReply(sender_psid, received_message) {
 
   switch(received_message) {     
       case "register":
-          current_question = "q1";
-          botQuestions(current_question, sender_psid);
+          showRegister(sender_psid);
         break;
       case "shop":
           showShop(sender_psid);
