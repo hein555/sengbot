@@ -452,15 +452,16 @@ const handleMessage = (sender_psid, received_message) => {
       user_message = user_message.toLowerCase(); 
 
       switch(user_message) { 
-      case "hi":
-          hiReply(sender_psid);
-        break;
+      
       case "mingalarbar":
           greetInMyanmar(sender_psid);
         break;
       case "order":
           appointment(sender_psid);
         break;
+      case "start":{
+        startGreeting(sender_psid);
+      }
       case "text":
         textReply(sender_psid);
         break;
@@ -774,16 +775,18 @@ const saveProductBooking = async (arg, sender_psid) =>{
 end room 
 ****************/
 
+/****************
+start shop 
+****************/
 
-const hiReply =(sender_psid) => {
-  let response = {"text": "Hello user, you can make room booking"};
+const startGreeting =(sender_psid) => {
+  let response = {"text": "Welcome to SENG Shop"};
   callSend(sender_psid, response);
 }
 
-const greetInMyanmar =(sender_psid) => {
-  let response = {"text": "Mingalarbar. How May I Help you?"};
-  callSend(sender_psid, response);
-}
+/****************
+end shop
+****************/
 
 const textReply =(sender_psid) => {
   let response = {"text": "You sent text message"};
