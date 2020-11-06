@@ -388,8 +388,8 @@ function handleQuickReply(sender_psid, received_message) {
       case "shop":
           showShop(sender_psid);
         break;   
-      case "Confirm-roombooking":
-          saveProductBooking(userInputs[user_id], sender_psid);
+      case "confirm-register":
+          saveRegistraion(userInputs[user_id], sender_psid);
         break;             
       default:
           defaultReply(sender_psid);
@@ -602,27 +602,27 @@ function webviewTest(sender_psid){
 /****************
 start room 
 ****************/
-// const appointment =(sender_psid) => {
-//   let response1 = {"text": "Welcome to SENG Shop"};
-//   let response2 = {
-//     "text": "Please Select Oil Cake or Peanut Oil",
-//     "quick_replies":[
-//             {
-//               "content_type":"text",
-//               "title":"Oil Cake",
-//               "payload":"product:Product",              
-//             },{
-//               "content_type":"text",
-//               "title":"Peanut Oil",
-//               "payload":"product:Food",             
-//             }
-//     ]
-//   };
-//   callSend(sender_psid, response1).then(()=>{
-//     return callSend(sender_psid, response2);
-//   });
+const appointment =(sender_psid) => {
+  let response1 = {"text": "Welcome to SENG Shop"};
+  let response2 = {
+    "text": "Please Select Oil Cake or Peanut Oil",
+    "quick_replies":[
+            {
+              "content_type":"text",
+              "title":"Oil Cake",
+              "payload":"product:Product",              
+            },{
+              "content_type":"text",
+              "title":"Peanut Oil",
+              "payload":"product:Food",             
+            }
+    ]
+  };
+  callSend(sender_psid, response1).then(()=>{
+    return callSend(sender_psid, response2);
+  });
 
-// }
+}
 
 // const showProduct =(sender_psid) => {
 //   let response = {
@@ -749,14 +749,6 @@ end room
 /****************
 startshop 
 ****************/
-
-      
-// const startGreeting =(sender_psid) => {
-//   let response = {"text": "Welcome to SENG Shop."};
-//   callSend(sender_psid, response).then(()=>{
-//     showMenu(sender_psid);
-//   });
-    
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response).then(()=>{
@@ -804,7 +796,7 @@ const botQuestions = (current_question,sender_psid) => {
 }
 
 const confirmRegister = (sender_psid) => {
-  console.log('ORDER INFO',userInputs);
+  console.log('REGISTER INFO',userInputs);
    let Summary ="";
    Summary += "name:" + userInputs[user_id].name + "\u000A";
    Summary += "phone:" + userInputs[user_id].phone + "\u000A";
@@ -814,7 +806,7 @@ const confirmRegister = (sender_psid) => {
 
 
   let response2 = {
-    "text": "Select your reply",
+    "text": "confirm to register",
     "quick_replies":[
             {
               "content_type":"text",
@@ -834,8 +826,14 @@ const confirmRegister = (sender_psid) => {
   }
   
 const saveRegister = async (arg, sender_psid) =>{
-  let data=arg;
+  let data = arg;
+  let today = new Date();
+
+  data.fid = sender_psid;
+  data.create_on = today;
+  data.point = 0;
   data.status = "pending";
+
   db.collection('users').add(data).then((success)=>{
       console.log("SAVED", success);
       let text = "Thank you. You have been registered."+ "\u000A";
