@@ -102,8 +102,6 @@ app.post('/webhook', (req, res) => {
         sess.user_id = sender_psid;  
       } 
 
-      console.log('SESSION:', sess);
-
       if (webhook_event.message) {
         if(webhook_event.message.quick_reply){
             handleQuickReply(sender_psid, webhook_event.message.quick_reply.payload);
