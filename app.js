@@ -791,13 +791,13 @@ const showRegister =(sender_psid) => {
 
 const botQuestions = (current_question,sender_psid) => {
   if(current_question =='q1'){
-    let response = {"text": bot_questions.q3};
+    let response = {"text": bot_questions.q1};
   callSend(sender_psid, response);
   }else if(current_question =='q2'){
-    let response = {"text": bot_questions.q4};
+    let response = {"text": bot_questions.q2};
   callSend(sender_psid, response);
   }else if(current_question =='q3'){
-    let response = {"text": bot_questions.q5};
+    let response = {"text": bot_questions.q3};
   callSend(sender_psid, response);
   }
 
