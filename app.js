@@ -131,6 +131,7 @@ app.get('/',function(req,res){
     res.send('your app is up and running');
 });
 
+
 app.get('/admin/roombookings', async function(req,res){
   const roombookingsRef = db.collection('roombookings');
   const snapshot = await roombookingsRef.get();
@@ -378,7 +379,7 @@ function handleQuickReply(sender_psid, received_message) {
           showShop(sender_psid);
         break;   
       case "confirm-register":
-          saveRegistration({name:sess.user_name,phone:sess.user_phone,address:sess.user_address}, sender_psid);
+          saveRegistration([name:sess.user_name,phone:sess.user_phone,address:sess.user_address], sender_psid);
         break;             
       default:
           defaultReply(sender_psid);
@@ -408,7 +409,7 @@ const handleMessage = (sender_psid, received_message) => {
     botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
     sess.user_address=received_message.text;
-    console.log('ADDRESS ENTERED: ', sess);
+    console.log('ADD ENTERED: ', sess);
     current_question='';
     confirmRegister(sender_psid);
   }
@@ -591,27 +592,27 @@ function webviewTest(sender_psid){
 /****************
 start room 
 ****************/
-// const appointment =(sender_psid) => {
-//   let response1 = {"text": "Welcome to SENG Shop"};
-//   let response2 = {
-//     "text": "Please Select Oil Cake or Peanut Oil",
-//     "quick_replies":[
-//             {
-//               "content_type":"text",
-//               "title":"Oil Cake",
-//               "payload":"product:Product",              
-//             },{
-//               "content_type":"text",
-//               "title":"Peanut Oil",
-//               "payload":"product:Food",             
-//             }
-//     ]
-//   };
-//   callSend(sender_psid, response1).then(()=>{
-//     return callSend(sender_psid, response2);
-//   });
+const appointment =(sender_psid) => {
+  let response1 = {"text": "Welcome to SENG Shop"};
+  let response2 = {
+    "text": "Please Select Oil Cake or Peanut Oil",
+    "quick_replies":[
+            {
+              "content_type":"text",
+              "title":"Oil Cake",
+              "payload":"product:Product",              
+            },{
+              "content_type":"text",
+              "title":"Peanut Oil",
+              "payload":"product:Food",             
+            }
+    ]
+  };
+  callSend(sender_psid, response1).then(()=>{
+    return callSend(sender_psid, response2);
+  });
 
-// }
+}
 
 // const showProduct =(sender_psid) => {
 //   let response = {
@@ -657,7 +658,19 @@ end room
 /****************
 startshop 
 ****************/
+// const botQuestions = (current_question,sender_psid) => {
+//   if(current_question =='q1'){
+//     let response = {"text": bot_questions.q3};
+//   callSend(sender_psid, response);
+//   }else if(current_question =='q2'){
+//     let response = {"text": bot_questions.q4};
+//   callSend(sender_psid, response);
+//   }else if(current_question =='q3'){
+//     let response = {"text": bot_questions.q5};
+//   callSend(sender_psid, response);
+//   }
 
+// }
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response).then(()=>{
@@ -714,7 +727,7 @@ const botQuestions = (current_question,sender_psid) => {
 }
 
 const confirmRegister = (sender_psid) => {
-  console.log('SESSION: ',sess);
+  console.log('SESSION:',sess);
    let Summary ="";
    Summary += "name:" + sess.user_name + "\u000A";
    Summary += "phone:" + sess.user_phone + "\u000A";
