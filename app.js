@@ -82,7 +82,6 @@ app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {  
-
   // Parse the request body from the POST
   let body = req.body;
 
@@ -130,7 +129,6 @@ app.use('/uploads', express.static('uploads'));
 app.get('/',function(req,res){    
     res.send('your app is up and running');
 });
-
 
 app.get('/admin/roombookings', async function(req,res){
   const roombookingsRef = db.collection('roombookings');
@@ -379,7 +377,7 @@ function handleQuickReply(sender_psid, received_message) {
           showShop(sender_psid);
         break;   
       case "confirm-register":
-          saveRegistration([name:sess.user_name,phone:sess.user_phone,address:sess.user_address], sender_psid);
+          saveRegistration({name:sess.user_name,phone:sess.user_phone,address:sess.user_address}, sender_psid);
         break;             
       default:
           defaultReply(sender_psid);
@@ -658,19 +656,6 @@ end room
 /****************
 startshop 
 ****************/
-// const botQuestions = (current_question,sender_psid) => {
-//   if(current_question =='q1'){
-//     let response = {"text": bot_questions.q3};
-//   callSend(sender_psid, response);
-//   }else if(current_question =='q2'){
-//     let response = {"text": bot_questions.q4};
-//   callSend(sender_psid, response);
-//   }else if(current_question =='q3'){
-//     let response = {"text": bot_questions.q5};
-//   callSend(sender_psid, response);
-//   }
-
-// }
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response).then(()=>{
