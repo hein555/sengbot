@@ -751,13 +751,18 @@ startshop
 ****************/
 
       
+// const startGreeting =(sender_psid) => {
+//   let response = {"text": "Welcome to SENG Shop."};
+//   callSend(sender_psid, response).then(()=>{
+//     showMenu(sender_psid);
+//   });
+    
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
-  callSend(sender_psid, response).then(()=>{
-    showMenu(sender_psid);
-  });
-    
+  showMenu(sender_psid);
+  callSend(sender_psid, response);
 }
+  
 const showMenu = (sender_psid) =>{
   let response = {
     "text": "Select your reply",
