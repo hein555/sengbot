@@ -381,7 +381,7 @@ function handleQuickReply(sender_psid, received_message) {
           showShop(sender_psid);
         break;   
       case "confirm-register":
-          saveRegistration([name:sess.user_name,phone:sess.user_phone,address:sess.user_address], sender_psid);
+          saveRegistration({name:sess.user_name,phone:sess.user_phone,address:sess.user_address}, sender_psid);
         break;             
       default:
           defaultReply(sender_psid);
