@@ -389,7 +389,7 @@ function handleQuickReply(sender_psid, received_message) {
           showShop(sender_psid);
         break;   
       case "confirm-register":
-          saveRegistraion(userInputs[user_id], sender_psid);
+          saveRegistration(userInputs[user_id], sender_psid);
         break;             
       default:
           defaultReply(sender_psid);
