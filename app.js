@@ -838,7 +838,7 @@ const saveRegistration = async (arg, sender_psid) =>{
 
   console.log('USER DATA', data);
 
-  db.collection('users').doc(sender_psid).add(data).then((success)=>{
+  db.collection('users').doc(sender_psid).set(data).then((success)=>{
       console.log("SAVED", success);
       let text = "Thank you. You have been registered."+ "\u000A";
       let response = {"text": text};
