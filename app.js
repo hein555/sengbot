@@ -143,9 +143,9 @@ app.post('/test',function(req,res){
     callSend(sender_psid, response);
 });
 
-app.get('/admin/roombookings', async function(req,res){
-  const roombookingsRef = db.collection('roombookings');
-  const snapshot = await roombookingsRef.get();
+app.get('/admin/itemorders', async function(req,res){
+  const itemordersRef = db.collection('itemorders');
+  const snapshot = await itemordersRef.get();
   if(snapshot.empty){
     res.send('no data');
   }
@@ -153,24 +153,24 @@ app.get('/admin/roombookings', async function(req,res){
   let data = [];
 
   snapshot.forEach(doc => {
-    let roombooking ={};
-    roombooking = doc.data();
-    roombooking.doc_id = doc.id;
+    let itemorder ={};
+    itemorder = doc.data();
+    itemorder.doc_id = doc.id;
 
-    data.push(roombooking);
+    data.push(itemorder);
     
   });
 
   console.log('DATA:', data);
 
-  res.render('roombookings.ejs', {data:data});
+  res.render('itemorders.ejs', {data:data});
 });
 
-app.get('/admin/updateroombooking/:doc_id', async function(req,res){
+app.get('/admin/updateitemorder/:doc_id', async function(req,res){
   let doc_id = req.params.doc_id;
     
-  const roombookingRef = db.collection('roombookings').doc(doc_id);
-  const doc = await roombookingRef.get();
+  const itemorderRef = db.collection('itemorders').doc(doc_id);
+  const doc = await itemorderRef.get();
   if (!doc.exists){
     console.log('No such document!');s
   }else{
@@ -179,25 +179,25 @@ app.get('/admin/updateroombooking/:doc_id', async function(req,res){
     data.doc_id = doc_id;
 
     console.log('Document data:', data);
-    res.render('editroombookings.ejs',{data:data});
+    res.render('edititemorders.ejs',{data:data});
   }
 });
 
-app.post('/admin/updateroombooking/', async function(req,res){
+app.post('/admin/updateitemorder/', async function(req,res){
   console.log('REQ:', req.body);
 
-  // const roombookingRef = db.collection('roombookings').doc('DC');
-  // const res  = await roombookingRef.update
+  // const itemorderRef = db.collection('itemorders').doc('DC');
+  // const res  = await itemorderRef.update
     
   res.send('ok');
-  // const roombookingRef = db.collection('roombookings').doc(doc_id);
-  // const doc = await roombookingRef.get();
+  // const itemorderRef = db.collection('itemorders').doc(doc_id);
+  // const doc = await itemorderRef.get();
   // if (!doc.exists){
   //   console.log('No such document!');s
   // }else{
   //   console.log('Document data:', doc.data());
   //   let data = doc.data();
-  //   res.render('editroombookings.ejs',{data:data});
+  //   res.render('edititemorders.ejs',{data:data});
   // }
 });
 
@@ -399,7 +399,7 @@ function handleQuickReply(sender_psid, received_message) {
         case "off":w
             showQuickReplyOff(sender_psid);
           break;   
-        case "confirm-roombooking":
+        case "confirm-itemorder":
             saveProductBooking(userInputs[user_id], sender_psid);
           break;             
         default:
@@ -741,7 +741,7 @@ const confirmOrder = (sender_psid) => {
             {
               "content_type":"text",
               "title":"Confirm",
-              "payload":"confirm-roombooking",              
+              "payload":"confirm-itemorder",              
             },{
               "content_type":"text",
               "title":"Cancel",
@@ -759,7 +759,7 @@ const saveProductBooking = async (arg, sender_psid) =>{
   let data=arg;
   data.ref= generateRandom(6);
   data.status = "pending";
-  db.collection('roombookings').add(data).then((success)=>{
+  db.collection('itemorders').add(data).then((success)=>{
       console.log("SAVED", success);
       let text = "Thank you. We have received your order."+ "\u000A";
       text += "We will call you very soon to confirm"+ "\u000A";
