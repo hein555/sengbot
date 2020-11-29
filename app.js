@@ -1,4 +1,4 @@
-'use strict';
+i'use strict';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const APP_URL = process.env.APP_URL;
 
@@ -422,9 +422,10 @@ const handleMessage = (sender_psid, received_message) => {
 
       switch(user_message) { 
       
-      case "order":
+      case "order":{
           appointment(sender_psid);
         break;
+      }
       case "start":{
         startGreeting(sender_psid);
         break;
