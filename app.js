@@ -388,7 +388,7 @@ function handleQuickReply(sender_psid, received_message) {
     botQuestions(current_question, sender_psid);
   }else if(received_message.startsWith("product:")){
     let r_f=received_message.slice(9);
-    userInputs[user_id].appointment=r_f;
+    userInputs[user_id].order=r_f;
     showProduct(sender_psid);
 
   }else{
@@ -442,7 +442,7 @@ const handleMessage = (sender_psid, received_message) => {
     userInputs[user_id].message=received_message.text;
     current_question='';
 
-    confirmAppointment(sender_psid);
+    confirmOrder(sender_psid);
   }
 
   else {
@@ -459,7 +459,7 @@ const handleMessage = (sender_psid, received_message) => {
           greetInMyanmar(sender_psid);
         break;
       case "order":
-          appointment(sender_psid);
+          order(sender_psid);
         break;
       case "text":
         textReply(sender_psid);
@@ -627,7 +627,7 @@ function webviewTest(sender_psid){
 /****************
 start room 
 ****************/
-const appointment =(sender_psid) => {
+const order =(sender_psid) => {
   let response1 = {"text": "Welcome to SENG Shop"};
   let response2 = {
     "text": "Please Select Oil Cake or Peanut Oil",
@@ -722,9 +722,9 @@ const botQuestions = (current_question,sender_psid) => {
 
 }
 
-const confirmAppointment = (sender_psid) => {
+const confirmOrder = (sender_psid) => {
   console.log('ORDER INFO',userInputs);
-   let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
+   let Summary = "order:" + userInputs[user_id].order + "\u000A";
    Summary += "room:" + userInputs[user_id].room + "\u000A";
    Summary += "visit:" + userInputs[user_id].visit + "\u000A";
    Summary += "name:" + userInputs[user_id].name + "\u000A";
@@ -761,7 +761,7 @@ const saveProductBooking = async (arg, sender_psid) =>{
   data.status = "pending";
   db.collection('roombookings').add(data).then((success)=>{
       console.log("SAVED", success);
-      let text = "Thank you. We have received your appointment."+ "\u000A";
+      let text = "Thank you. We have received your order."+ "\u000A";
       text += "We will call you very soon to confirm"+ "\u000A";
       text +="Your Booking reference number is:" + data.ref;
       let response = {"text": text};
