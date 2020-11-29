@@ -421,11 +421,22 @@ const handleMessage = (sender_psid, received_message) => {
       user_message = user_message.toLowerCase(); 
 
       switch(user_message) { 
+      case "hi":
+          hiReply(sender_psid);
+        break;
       
-      case "order":{
+      case "mingalarbar":
+          greetInMyanmar(sender_psid);
+        break;
+      
+      case "order":
           appointment(sender_psid);
         break;
-      }
+
+      // case "order":{
+      //     appointment(sender_psid);
+      //   break;
+      // }
       case "start":{
         startGreeting(sender_psid);
         break;
@@ -622,6 +633,12 @@ end room
 /****************
 startshop 
 ****************/
+
+const hiReply =(sender_psid) => {
+  let response = {"text": "Hello user, you can make household product ordering"};
+  callSend(sender_psid, response);
+}
+
 const startGreeting =(sender_psid) => {
   let response = {"text": "Welcome to SENG Shop."};
   callSend(sender_psid, response).then(()=>{
