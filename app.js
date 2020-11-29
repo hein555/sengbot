@@ -776,7 +776,7 @@ end room
 
 
 const hiReply =(sender_psid) => {
-  let response = {"text": "Hello user, you can make room booking"};
+  let response = {"text": "Hello user, you can make item order"};
   callSend(sender_psid, response);
 }
 
