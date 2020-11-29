@@ -1,4 +1,4 @@
-i'use strict';
+'use strict';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const APP_URL = process.env.APP_URL;
 
@@ -24,14 +24,17 @@ app.use(body_parser.json());
 app.use(body_parser.urlencoded());
 
 const bot_questions ={
-"q1": "Please enter your name",
-"q2": "Please enter phone number",
-"q3": "Please enter address"
+"q3": "Please enter full name",
+"q4": "Please enter phone",
+"q5": "Please enter email",
+"q6": "Please leave a message"
 }
 
-let sess;
 let current_question = '';
 
+let user_id = '';
+
+let userInputs = [];
 
 /*
 var storage = multer.diskStorage({
@@ -84,8 +87,6 @@ app.post('/webhook', (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
 
-  sess = req.session;
-
   
 
   // Check the webhook event is from a Page subscription
@@ -95,13 +96,13 @@ app.post('/webhook', (req, res) => {
       let webhook_event = entry.messaging[0];
       let sender_psid = webhook_event.sender.id; 
 
+      user_id = sender_psid;
       
-      sess = req.session;
-      if(!sess.user_id){
-        session.user_id = sender_psid;
+      if(!userInputs[user_id]){
+        userInputs[user_id]={}; 
       }
       
-      console.log('SESSION: ', sess);
+     
 
       if (webhook_event.message) {
         if(webhook_event.message.quick_reply){
@@ -130,6 +131,16 @@ app.use('/uploads', express.static('uploads'));
 
 app.get('/',function(req,res){    
     res.send('your app is up and running');
+});
+
+app.get('/test',function(req,res){    
+    res.render('test.ejs');
+});
+
+app.post('/test',function(req,res){
+    const sender_psid = req.body.sender_id;     
+    let response = {"text": "You  click delete button"};
+    callSend(sender_psid, response);
 });
 
 app.get('/admin/roombookings', async function(req,res){
@@ -370,21 +381,35 @@ function handleQuickReply(sender_psid, received_message) {
 
   received_message=received_message.toLowerCase();
 
-  switch(received_message) {     
-      case "register":
-        current_question = "q1";
-          botQuestions(current_question, sender_psid);
-        break;
-      case "shop":
-          showShop(sender_psid);
-        break;   
-      case "confirm-register":
-          saveRegistration({name:sess.user_name, phone:sess.user_phone, address:sess.user_address}, sender_psid);
-        break;             
-      default:
-          defaultReply(sender_psid);
+  if(received_message.startsWith("visit:")){
+    let visit=received_message.slice(6);
+    userInputs[user_id].visit=visit;
+    current_question='q3';
+    botQuestions(current_question, sender_psid);
+  }else if(received_message.startsWith("product:")){
+    let r_f=received_message.slice(9);
+    userInputs[user_id].appointment=r_f;
+    showProduct(sender_psid);
+
+  }else{
+    switch(received_message) {     
+        case "on":
+            showQuickReplyOn(sender_psid);
+          break;
+        case "off":w
+            showQuickReplyOff(sender_psid);
+          break;   
+        case "confirm-roombooking":
+            saveProductBooking(userInputs[user_id], sender_psid);
+          break;             
+        default:
+            defaultReply(sender_psid);
   } 
 }
+  
+ 
+}
+
 /**********************************************
 Function to Handle when user send text message
 ***********************************************/
@@ -397,21 +422,27 @@ const handleMessage = (sender_psid, received_message) => {
 
   if(received_message.attachments){
      handleAttachments(sender_psid, received_message.attachments);
-  }else if(current_question == 'q1'){
-    
-    sess.user_name=received_message.text;
-    current_question='q2';
-    botQuestions(current_question,sender_psid);
-  }else if(current_question == 'q2'){
-    
-    sess.user_phone=received_message.text;
-    current_question='q3';
-    botQuestions(current_question,sender_psid);
   }else if(current_question == 'q3'){
-    
-    sess.user_address=received_message.text;
+    console.log('FULL NAME ENTERED',received_message.text);
+    userInputs[user_id].name=received_message.text;
+    current_question='q4';
+    botQuestions(current_question,sender_psid);
+  }else if(current_question == 'q4'){
+    console.log('PHONE ENTERED',received_message.text);
+    userInputs[user_id].phone=received_message.text;
+    current_question='q5';
+    botQuestions(current_question,sender_psid);
+  }else if(current_question == 'q5'){
+    console.log('EMAIL ENTERED',received_message.text);
+    userInputs[user_id].email=received_message.text;
+    current_question='q6';
+    botQuestions(current_question,sender_psid);
+  }else if(current_question == 'q6'){
+    console.log('MESSAGE ENTERED',received_message.text);
+    userInputs[user_id].message=received_message.text;
     current_question='';
-    confirmRegister(sender_psid);
+
+    confirmAppointment(sender_psid);
   }
 
   else {
@@ -424,25 +455,17 @@ const handleMessage = (sender_psid, received_message) => {
       case "hi":
           hiReply(sender_psid);
         break;
-      
       case "mingalarbar":
           greetInMyanmar(sender_psid);
         break;
-      
       case "order":
           appointment(sender_psid);
         break;
-
-      // case "order":{
-      //     appointment(sender_psid);
-      //   break;
-      // }
-      case "start":{
-        startGreeting(sender_psid);
-        break;
-      }
       case "text":
         textReply(sender_psid);
+        break;
+      case "quick":
+        quickReply(sender_psid);
         break;
       case "button":
         buttonReply(sender_psid);
@@ -626,91 +649,99 @@ const appointment =(sender_psid) => {
 
 }
 
-/****************
-end room 
-****************/
-
-/****************
-startshop 
-****************/
-
-const hiReply =(sender_psid) => {
-  let response = {"text": "Hello user, you can make household product ordering"};
-  callSend(sender_psid, response);
-}
-
-const startGreeting =(sender_psid) => {
-  let response = {"text": "Welcome to SENG Shop."};
-  callSend(sender_psid, response).then(()=>{
-    showMenu(sender_psid);  
-  });
-  
-  
-}
-  
-const showMenu = async(sender_psid) =>{
-  let title = "";
-  const userRef = db.collection('users').doc(sender_psid);
-  const user = await userRef.get();
-  if(!user.exists){
-    title = "Register";
-  }else{
-    title = "Update Profile";
-  }
-
+const showProduct =(sender_psid) => {
   let response = {
-    "text": "Select your reply",
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": [{
+            "title": "Olive Oil Cake",
+            "subtitle": "Bon Appetit",
+            "image_url":"https://i.pinimg.com/236x/f6/15/77/f61577e4eb47fb4f693fe4036b8fa7f6.jpg",                       
+            "buttons": [
+                {
+                  "type": "postback",
+                  "title": "Olive Oil Cake",
+                  "payload": "Product:Olive Oil Cake",
+                }
+              ],
+          },
+          {
+            "title": "Classic Olive Oil Cake",
+            "subtitle": "Bake from Scratch",
+            "image_url":"https://images-eu.ssl-images-amazon.com/images/I/51zOKAleUYL._SY300_QL70_ML2_.jpg",                       
+            "buttons": [
+                {
+                  "type": "postback",
+                  "title": "Classic Olive Oil Cake",
+                  "payload": "Product:Classic Olive Oil Cake",
+                }
+              ],
+          }
+          ]
+        }
+      }
+    }
+  callSend(sender_psid, response);
+
+}
+
+const firstOrFollowup =(sender_psid) => {  
+  let response = {
+    "text": "First Time Visit or Follow Up?",
     "quick_replies":[
             {
               "content_type":"text",
-              "title":title,
-              "payload":"register",              
+              "title":"First Time",
+              "payload":"visit:first time",              
             },{
               "content_type":"text",
-              "title":"Shop",
-              "payload":"shop",             
+              "title":"Follow Up",
+              "payload":"visit:follow up",             
             }
     ]
   };
   callSend(sender_psid, response);
 }
 
-const showRegister =(sender_psid) => {
-  let response = {"text": "You sent text message"};
-  callSend(sender_psid, response);
-}
-
 const botQuestions = (current_question,sender_psid) => {
-  if(current_question =='q1'){
-    let response = {"text": bot_questions.q1};
-  callSend(sender_psid, response);
-  }else if(current_question =='q2'){
-    let response = {"text": bot_questions.q2};
-  callSend(sender_psid, response);
-  }else if(current_question =='q3'){
+  if(current_question =='q3'){
     let response = {"text": bot_questions.q3};
+  callSend(sender_psid, response);
+  }else if(current_question =='q4'){
+    let response = {"text": bot_questions.q4};
+  callSend(sender_psid, response);
+  }else if(current_question =='q5'){
+    let response = {"text": bot_questions.q5};
+  callSend(sender_psid, response);
+  }else if(current_question =='q6'){
+    let response = {"text": bot_questions.q6};
   callSend(sender_psid, response);
   }
 
 }
 
-const confirmRegister = (sender_psid) => {
-  console.log('SESSION: ', sess);
-   let Summary ="";
-   Summary += "name:" + sess.user_name + "\u000A";
-   Summary += "phone:" + sess.user_phone + "\u000A";
-   Summary += "address:" + sess.user_address + "\u000A";
+const confirmAppointment = (sender_psid) => {
+  console.log('ORDER INFO',userInputs);
+   let Summary = "appointment:" + userInputs[user_id].appointment + "\u000A";
+   Summary += "room:" + userInputs[user_id].room + "\u000A";
+   Summary += "visit:" + userInputs[user_id].visit + "\u000A";
+   Summary += "name:" + userInputs[user_id].name + "\u000A";
+   Summary += "phone:" + userInputs[user_id].phone + "\u000A";
+   Summary += "email:" + userInputs[user_id].email + "\u000A";
+   Summary += "message:" + userInputs[user_id].message + "\u000A";
    
   let response1 = {"text": Summary};
 
 
   let response2 = {
-    "text": "confirm to register",
+    "text": "Select your reply",
     "quick_replies":[
             {
               "content_type":"text",
               "title":"Confirm",
-              "payload":"confirm-register",              
+              "payload":"confirm-roombooking",              
             },{
               "content_type":"text",
               "title":"Cancel",
@@ -724,36 +755,67 @@ const confirmRegister = (sender_psid) => {
 
   }
   
-const saveRegistration = async (arg, sender_psid) =>{
-  let data = arg;
-  
-  console.log();
-
-  let today = new Date();
-
-  data.fid = sender_psid;
-  data.create_on = today;
-  data.point = 0;
+const saveProductBooking = async (arg, sender_psid) =>{
+  let data=arg;
+  data.ref= generateRandom(6);
   data.status = "pending";
-
-  console.log('USER DATA', data);
-
-  db.collection('users').doc(sender_psid).set(data).then((success)=>{
+  db.collection('roombookings').add(data).then((success)=>{
       console.log("SAVED", success);
-      let text = "Thank you. You have been registered."+ "\u000A";
+      let text = "Thank you. We have received your appointment."+ "\u000A";
+      text += "We will call you very soon to confirm"+ "\u000A";
+      text +="Your Booking reference number is:" + data.ref;
       let response = {"text": text};
       callSend(sender_psid, response);
     }).catch((err)=>{
         console.log('Error', err);
     });
   }
-
 /****************
-endshop
+end room 
 ****************/
+
+
+const hiReply =(sender_psid) => {
+  let response = {"text": "Hello user, you can make room booking"};
+  callSend(sender_psid, response);
+}
+
+const greetInMyanmar =(sender_psid) => {
+  let response = {"text": "Mingalarbar. How May I Help you?"};
+  callSend(sender_psid, response);
+}
 
 const textReply =(sender_psid) => {
   let response = {"text": "You sent text message"};
+  callSend(sender_psid, response);
+}
+
+
+const quickReply =(sender_psid) => {
+  let response = {
+    "text": "Select your reply",
+    "quick_replies":[
+            {
+              "content_type":"text",
+              "title":"On",
+              "payload":"on",              
+            },{
+              "content_type":"text",
+              "title":"Off",
+              "payload":"off",             
+            }
+    ]
+  };
+  callSend(sender_psid, response);
+}
+
+const showQuickReplyOn =(sender_psid) => {
+  let response = { "text": "You sent quick reply ON" };
+  callSend(sender_psid, response);
+}
+
+const showQuickReplyOff =(sender_psid) => {
+  let response = { "text": "You sent quick reply OFF" };
   callSend(sender_psid, response);
 }
 
